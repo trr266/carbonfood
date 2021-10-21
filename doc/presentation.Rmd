@@ -1,0 +1,153 @@
+---
+title: "The Preston Curve Revisited"
+author: "Joachim Gassen"
+institute: "TRR 266 Accounting for Transparency"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  beamer_presentation: 
+    latex_engine: xelatex # pdflatex creates rastered fonts
+    slide_level: 3
+
+        
+header-includes:
+- \usepackage{booktabs} 
+- \usepackage{threeparttable}
+- \usepackage{graphicx}
+---
+
+
+```{r setup, include=FALSE, cache=F, message=F, warning=F, results="hide"}
+knitr::opts_chunk$set(
+  cache = FALSE, echo = FALSE, message = FALSE, warning = FALSE
+)
+library(tidyverse)
+library(kableExtra)
+load("../output/results.rda")
+load("../data/generated/sample.rda")
+```
+
+
+# Motivation
+
+### The Preston Curve
+
+\begin{center}
+\includegraphics[width=0.8\textwidth]{../media/preston_1975_p235.png} \\
+Preston (1975, p. 235)
+\end{center}
+
+
+### Data
+
+```{r tab_descriptives_sample, results="asis"}
+desc_rnames <- paste0("\\textit{", smp_def$label[7:9], "}")
+t <- tab_desc_stat
+rownames(t$df) <- desc_rnames
+names(t$df)[c(5,7)] <- c("25 \\%", "75 \\%")
+kable(
+  t$df, digits = c(0, 3, 3, 3, 3, 3, 3, 3), format = "latex",
+  caption = "\\label{tab:descriptives}Descriptive Statistics",
+  format.args = list(decimal.mark = ".", big.mark = ",", 
+                     scientific=FALSE),
+  booktabs = TRUE, escape = FALSE, linesep = ""
+) -> kab_latex
+
+lat_tab <- unlist(strsplit(kab_latex, "\n"))
+lat_tab[6] <- "\\\\[-1.8ex]\\hline \\hline \\\\[-1.8ex]"
+lat_tab[8] <- "\\hline\\\\[-1.8ex]"
+lat_tab[length(lat_tab) - 2] <- "\\\\[-1.8ex]\\hline \\hline \\\\[-1.8ex]"
+
+latex_tab <- c(
+  "\\begin{table}[!htbp]",  
+  "\\resizebox{\\textwidth}{!}{",
+  "\\begin{threeparttable}",
+  lat_tab[5:(length(lat_tab) - 2)],
+  "\\end{tabular}",
+  "\\begin{tablenotes}[flushleft]",
+  "\\setlength{\\labelsep}{0pt}",
+  sprintf(
+    "\\item Note: The data is obtained from the World Bank. The sample covers %d countries and the period %d to %d. \\textit{National Income per captia} values are in constant 2010 thousand U.S. dollars.", length(unique(smp$country)),
+    min(as.numeric(as.character(smp$year))), 
+    max(as.numeric(as.character(smp$year)))
+  ),
+ "\\end{tablenotes}",
+  "\\end{threeparttable}",
+  "}",
+  "\\end{table}"
+)
+cat(paste(latex_tab, collapse = "\n"))  
+```
+
+
+### Life Expectancy by National Income
+
+```{r Scatter}
+fig_scatter
+```
+
+
+### No presentation without correlation table...
+
+``` {r CorrTable, results="asis"}
+tab <- tab_corr
+lat_tab <- unlist(strsplit(tab$kable_ret, "\n"))
+lat_tab[7:9] <- str_replace(
+  lat_tab[7:9], fixed(smp_def$var_name[8:10]), smp_def$label[8:10]
+)
+lat_tab[4] <- "\\\\[-1.8ex]\\hline \\hline \\\\[-1.8ex]"
+lat_tab[6] <- "\\hline\\\\[-1.8ex]"
+lat_tab[10] <- "\\\\[-1.8ex]\\hline \\hline \\\\[-1.8ex]"
+latex_tab <- c(
+  "\\begin{center}",
+  "\\begin{tabular}{lccc}",
+  lat_tab[4:10],
+  "\\end{tabular}",
+  "\\end{center}"
+)
+cat(paste(latex_tab, collapse = "\n"))
+```
+
+
+### ... and regression table
+
+``` {r RegTable, results="asis"}
+tab <- tab_regression$table
+tab[12] <- paste(
+  "\\\\[-1.8ex] & \\multicolumn{4}{c}{", smp_def$label[9], "} \\\\"
+)
+esc_var_names <- str_replace_all(smp_def$var_name, fixed ("_"), "\\_")
+reg_names <- tibble(
+  var_name = esc_var_names[c(10, 8)],
+  label = smp_def$label[c(10, 8)]
+)
+for (i in c(15, 18)) {
+  pos <- (i-12)/3
+  tab[i] <- str_replace(
+    tab[i], fixed(reg_names$var_name[pos]), reg_names$label[pos]
+  )
+}
+
+latex_tab <- c(
+  "\\begin{center}",
+  "\\resizebox*{!}{0.8\\textheight}{",
+  "\\begin{tabular}{lcccc}",
+  tab[8:33],
+  "\\end{tabular}}",
+  "\\end{center}"
+)
+cat(paste(latex_tab, collapse = "\n"))
+```
+
+
+### Conclusion
+
+- The Preston Curve is alive and well! 
+- Have fun adjusting this template to fit your research needs
+- Consider contributing to its repository and promote Open Science!
+
+
+
+
+
+
+

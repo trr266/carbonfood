@@ -1,0 +1,193 @@
+---
+title: |
+  | A Template for Reproducible Empirical Research^[I acknowledge financial support from Deutsche Forschungsgemeinschaft-Project-ID 403041268 - TRR 266.] \vspace{1cm}
+
+author: |
+  | Joachim Gassen 
+  | TRR 266 "Accounting for Transparency"
+  | Humboldt-Universität zu Berlin 
+
+date: |
+  | `r loc <- Sys.getlocale(category = "LC_TIME"); Sys.setlocale("LC_TIME", "C"); fdate <- format(Sys.time(), '%B %e, %Y'); Sys.setlocale("LC_TIME", loc); fdate` \vspace{1cm}
+  
+abstract: |
+  | This is a paper stub generated out of a template repository. It repliactes the association of national income per capita with life expectancy that has become known as the 'Preston Curve'. 
+  | \vspace{8cm}
+
+bibliography: references.bib
+biblio-style: apsr
+
+output:
+  pdf_document: 
+    number_sections: true
+  toc: no
+fig_caption: yes
+fontsize: 11pt
+ident: yes
+
+always_allow_html: yes
+
+header-includes:
+  - \usepackage[nolists]{endfloat}    
+  - \usepackage{setspace}\doublespacing
+  - \setlength{\parindent}{4em}
+  - \setlength{\parskip}{0em}
+  - \usepackage[hang,flushmargin]{footmisc}
+  - \usepackage{caption} 
+  - \captionsetup[table]{skip=24pt,font=bf}
+  - \usepackage{array}
+  - \usepackage{threeparttable}
+  - \usepackage{adjustbox}
+  - \usepackage{graphicx}
+  - \usepackage{csquotes}
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(knitr)
+library(kableExtra)
+opts_chunk$set(fig.pos = 'p') # Places figures on their own pages
+opts_chunk$set(out.width = '100%', dpi=300)
+opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE, cache=FALSE)
+
+load("../data/generated/sample.rda")
+load("../output/results.rda")
+```
+
+\pagebreak
+
+# Introduction
+  
+The scientific community widely agrees that reproduction, defined as reproducing findings using the same sample and method, and replication,  defined as retesting findings using a new sample while applying the same method, of empirical results are a central building block of  sound empirical evidence. Yet, although data and code repositories are on the rise, the additional materials only rarely lead to studies being directly reproducible. While several reasons for this observation have been discussed by prior literature, most commentators agree that the lack of established reproducible workflows makes reproductions and replications  inherently costly to do (@GGR2018). 
+
+On the GitHub repository of the TRR 266 "Accounting for Transparency", we host and maintain a repository (https://github.com/trer) that implements a bare-bones reproducible workflow. This paper stub is included in the repo and can be reproduced in its entirely by running the code included in the repository.
+
+
+# The Preston Curve as a Case Study
+
+To demonstrate the workflow, I replicate a well-known association in global health and development economics: the positive association of national income per capita as assessed by country-level real Gross Domestic Product (GDP) per capita with country-average  life expectancy at birth. This association has become known as the "Preston Curve" (@P1975), as reproduced in Figure \ref{fig:preston_curve}. 
+
+```{r fig_preston_curve, out.height="15cm", fig.align = "center", fig.cap="\\label{fig:preston_curve}Preston Curve (Preston (1975): 235)"}
+include_graphics("../media/preston_1975_p235.png")
+```
+
+While it is unclear whether the association is indicative for a causal link of national income on life expectancy, it is often referred to in public debates as one of the main arguments why economic growth is socially desirable. The analysis presented here is only meant to  demonstrate the workflow of the repository and not to contribute to the underlying 
+question of causality. 
+
+The data for the analysis has been collected from the Open Data repository of the World Bank (https://data.worldbank.org). The sample is limited to country-year observations that have non-missing values for all variables and I use the natural logarithm of GDP per capita as my measure for national income per capita to account for the underlying growth process that shapes national income. The descriptive statistics of the data are presented in Table \ref{tab:descriptives}.
+
+Table \ref{tab:corr} reports the correlations between dependent and independent variables. As expected, it features a strong positive correlation between national income and life expectancy. Figure \ref{fig:scatter} visualizes this association.
+
+To verify that this association is robust to including controls and general cross-sectional as well as time variance, I estimate the respective coefficient for GDP per capita in a multiple  regression framework. Using a level-log multiple regression setup, Table \ref{tab:reg} yields a set of model estimates. As you can see, the association between national income and life expectancy is significant at conventional levels across all specifications. The magnitude of the association, however, is significantly reduced once one controls for unobserved cross-sectional variation by including country fixed effects.
+
+
+# Conclusion
+
+The Preston curve is alive and well. While being simplistic, the presented analysis contains all main building blocks of a typical empirical study based on observational data: data collection, sample specification, variable construction, exploratory as well as confirmatory analysis and result presentation. Have fun using this template for your own projects and consider contributing to its development, e.g., by providing code for Software packages besides R.
+
+```{r Scatter, echo = FALSE, fig.align="center", fig.cap="\\label{fig:scatter}National Income and Life Expectancy"}
+fig_scatter
+```
+
+```{r tab_descriptives_sample, results="asis"}
+desc_rnames <- paste0("\\textit{", smp_def$label[7:9], "}")
+t <- tab_desc_stat
+rownames(t$df) <- desc_rnames
+names(t$df)[c(5,7)] <- c("25 \\%", "75 \\%")
+kable(
+  t$df, digits = c(0, 3, 3, 3, 3, 3, 3, 3), format = "latex",
+  caption = "\\label{tab:descriptives}Descriptive Statistics",
+  format.args = list(decimal.mark = ".", big.mark = ",", 
+                     scientific=FALSE),
+  booktabs = TRUE, escape = FALSE, linesep = ""
+) -> kab_latex
+
+lat_tab <- unlist(strsplit(kab_latex, "\n"))
+lat_tab[6] <- "\\\\[-1.8ex]\\hline \\hline \\\\[-1.8ex]"
+lat_tab[8] <- "\\hline\\\\[-1.8ex]"
+lat_tab[length(lat_tab) - 2] <- "\\\\[-1.8ex]\\hline \\hline \\\\[-1.8ex]"
+
+latex_tab <- c(
+  "\\begin{table}[!htbp]",  
+  lat_tab[3],
+  "\\begin{adjustbox}{width=\\textwidth}",
+  "\\begin{threeparttable}",
+  lat_tab[5:(length(lat_tab) - 1)],
+  "\\begin{tablenotes}[flushleft]",
+  "\\setlength{\\labelsep}{0pt}",
+  "\\footnotetext",
+  sprintf(
+    "\\item Note: The data is obtained from the World Bank. The sample covers %d countries and the period %d to %d. \\textit{National Income per captia} values are in constant 2010 thousand U.S. dollars.", length(unique(smp$country)),
+    min(as.numeric(as.character(smp$year))), 
+    max(as.numeric(as.character(smp$year)))
+  ),
+  "\\end{tablenotes}",
+  "\\end{threeparttable}",
+  "\\end{adjustbox}",
+  "\\end{table}"
+)
+cat(paste(latex_tab, collapse = "\n"))  
+```
+
+``` {r CorrTable, results="asis"}
+tab <- tab_corr
+lat_tab <- unlist(strsplit(tab$kable_ret, "\n"))
+lat_tab[7:9] <- str_replace(
+  lat_tab[7:9], fixed(smp_def$var_name[8:10]), smp_def$label[8:10]
+)
+lat_tab[4] <- "\\\\[-1.8ex]\\hline \\hline \\\\[-1.8ex]"
+lat_tab[6] <- "\\hline\\\\[-1.8ex]"
+lat_tab[10] <- "\\\\[-1.8ex]\\hline \\hline \\\\[-1.8ex]"
+lat_tab[12] <- "\\begin{tablenotes}[flushleft] \\setlength{\\labelsep}{0pt} \\footnotetext"
+
+latex_tab <- c(
+  "\\begin{table}[!htbp]",  
+  "\\centering",
+  "\\caption{\\label{tab:corr}Correlations}",
+  lat_tab,
+  "\\end{table}"
+)
+cat(paste(latex_tab, collapse = "\n"))
+```
+
+
+``` {r RegTable, results="asis"}
+tab <- tab_regression$table
+tab[12] <- paste(
+  "\\\\[-1.8ex] & \\multicolumn{4}{c}{", smp_def$label[9], "} \\\\"
+)
+esc_var_names <- str_replace_all(smp_def$var_name, fixed ("_"), "\\_")
+reg_names <- tibble(
+  var_name = esc_var_names[c(10, 8)],
+  label = smp_def$label[c(10, 8)]
+)
+for (i in c(15, 18)) {
+  pos <- (i-12)/3
+  tab[i] <- str_replace(
+    tab[i], fixed(reg_names$var_name[pos]), reg_names$label[pos]
+  )
+}
+latex_tab <- c(
+  "\\begin{table}[!htbp]",  
+  "\\caption{\\label{tab:reg}Regressions}",
+  "\\centering",
+  "\\begin{tabular}{lcccc}",
+  tab[8:33],
+  "\\end{tabular}",
+  "\\end{table}"
+)
+cat(paste(latex_tab, collapse = "\n"))
+```
+
+\pagebreak
+
+\setcounter{table}{0}
+\renewcommand{\thetable}{\arabic{table}}
+
+# References {-}
+\setlength{\parindent}{-0.2in}
+\setlength{\leftskip}{0.2in}
+\setlength{\parskip}{8pt}
+\noindent
