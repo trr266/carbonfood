@@ -4,7 +4,7 @@ This is the repository of a project on the impact of carbon footprint informatio
 
 We a are planning to run a large-scale field experiment to assess how attributes of carbon footprint information affect consumer choice. Partnering with a large canteen operator, we manipulate the understandability, mental accounting framing, and salience of carbon footprint food labels in a natural setting. We then measure differences in subjects' food choices with regards to (1) the type of dish selected (high- or low-carbon dishes), (2) the total amount of food chosen, and (3) the carbon footprint of the food chosen. A fully parameterized simulation-based power analysis indicates that the expected features of our setting provide sufficient statistical power to find the predicted effects, if true, at conventional significance levels, making ultimate experimental results interpretable regardless of the outcome.
 
-Currently, this repository contains this power analysis along with some auxilirary data. You can take a [look at it here](https://trr266.de/carbonfood/power_analysis.html). If you want to work with the R code itself, it resides in the `doc` directory. You can knit either manually or by running `make all` (assuming that you have a working make environment installed - see below for details).
+Currently, this repository contains this power analysis along with some auxiliary data. You can take a [look at it here](https://trr266.de/carbonfood/power_analysis.html). If you want to work with the R code itself, it resides in the `doc` directory. You can knit either manually or by running `make all` (assuming that you have a working make environment installed - see below for details).
 
 Feel to reach out to the authors for questions and/or feedback.
 
