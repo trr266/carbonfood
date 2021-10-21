@@ -1,0 +1,27 @@
+area,authors,method,treatment,n,sign_dummy,baseline,effect,stderr
+Calorie labeling,Bollinger et al. (2011),Natural field experiment with control,Label Info,118480,1,1,-0.06,0.001
+Calorie labeling,Donnelly et al. (2018),Field experiment (two online surveys not included in overview),Label Info,56,1,0.219,-0.001,0.01
+Calorie labeling,Donnelly et al. (2018),Field experiment (two online surveys not included in overview),Label Info,56,1,0.219,-0.001,0.01
+Calorie labeling,Donnelly et al. (2018),Field experiment (two online surveys not included in overview),Label Info,56,1,0.219,-0.034,0.01
+Calorie labeling,Ellison et al. (2013),Field experiment (plus survey) randomized,traffic light labels,138,1,713.43,-152.9,210.66
+Calorie labeling,Ellison et al. (2013),Field experiment (plus survey) randomized,Label Info,138,1,713.43,-108.58,193.01
+Calorie labeling,Wisdom et al. (2010),Field experiment; randomized,Label Info,632,1,850.85,-60.69,18.95
+Calorie labeling,Wisdom et al. (2010),Field experiment; randomized,Anchor/benchmark,632,1,850.85,-37.81,18.82
+Calorie labeling,Downs et al. (2013),Field experiment; randomized without control,Label Info,1036,1,743.15,17.74,28.2
+Calorie labeling,Downs et al. (2013),Field experiment; randomized without control,Anchor/benchmark,1036,1,743.15,61.44,34.22
+Calorie labeling,Downs et al. (2013),Field experiment; randomized without control,Anchor/benchmark,1036,1,743.15,-20.05,33.07
+Calorie labeling,Downs et al. (2013),Field experiment; randomized without control,Anchor/benchmark,1036,1,704.59,-72.17,67
+Calorie labeling,Downs et al. (2013),Field experiment; randomized without control,Anchor/benchmark,1036,1,704.59,22.68,69.51
+Calorie labeling,VanEpps et al. (2016),field experiment,Numeric label Info,901,1,601.22,-62.77,31.1
+Calorie labeling,VanEpps et al. (2016),field experiment,traffic light labels,901,1,601.22,-69.42,32.84
+Calorie labeling,VanEpps et al. (2016),field experiment,Numeric x traffic light,901,1,601.22,-72.51,33.46
+GHG food labeling,Slapø and Karevold (2019),field experiment,traffic light labels,111,1,0.659,-0.069,0.042
+GHG food labeling,Slapø and Karevold (2019),field experiment,traffic light labels,111,-1,0.18,0.029,0.026
+GHG food labeling,Slapø and Karevold (2019),field experiment,traffic light labels,117,1,0.658,-0.038,0.044
+GHG food labeling,Slapø and Karevold (2019),field experiment,traffic light labels,117,-1,0.189,0.017,0.027
+GHG food labeling,Slapø and Karevold (2019),field experiment,single traffic light labels,111,-1,0.182,0.01,0.027
+GHG food labeling,Soregaroli et al. (2021),field experiment,no context,200,-1,1.095,0.028,0.048
+GHG food labeling,Soregaroli et al. (2021),field experiment,Budget,200,-1,1.095,0.076,0.047
+GHG food labeling,Brunner et al. (2018),field experiment,single traffic light labels,20373,-1,1,0.056,0.0141
+GHG food labeling,Brunner et al. (2018),field experiment,single traffic light labels,20373,1,1,-0.0238,0.0122
+GHG food labeling,Elofsson et al. (2016),field experiment,assurance,476,-1,1,0.0508,0.0328

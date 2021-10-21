@@ -1,0 +1,864 @@
+---
+title: 'How Does Carbon Footprint Information Affect Consumer Choice? Power Analysis'
+author: "The authors of Beyer et al. (TBD)"
+date: '2021-10-21'
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(fixest)
+library(truncnorm)
+library(knitr)
+library(kableExtra)
+library(modelsummary)
+library(ggridges)
+library(emojifont)
+library(googlesheets4)
+library(readxl)
+
+load.fontawesome()
+source("../code/R/linear_hypothesis_testing_fixest.R")
+
+devtools::source_url(
+  "https://raw.githubusercontent.com/trr266/treat/main/code/R/theme_trr.R"
+)
+
+set.seed(12)
+```
+
+```{r Functions, include=FALSE}
+sim_base_sample <- function(p, mp) {
+  df  <- NULL
+  for (d in 1:p$days) {
+    diners_per_day <- round(rtruncnorm(
+      1, a = 0, mean = p$mn_diners_per_day, sd = p$sd_diners_per_day
+    ))
+    meat_fish_prob <- rtruncnorm(
+      1, 0, 1, p$prob_meat_fish, p$sd_meat_fish
+    )
+    if ((d - 1) %% 5 == 0) diners_per_day = round(p$monday_churn*diners_per_day)
+    if (d %% 5 == 0) diners_per_day = round(p$friday_churn*diners_per_day)
+    mn_food_weight <- rtruncnorm(
+      1, 400, 600, p$mn_mn_food_weight, p$sd_mn_food_weight
+    )
+    sd_food_weight <- rtruncnorm(
+      1, 75, 125, p$mn_sd_food_weight, p$sd_sd_food_weight
+    )
+    n_meat_fish <- round(diners_per_day * meat_fish_prob)
+    diners_slots <- sample(1:p$treatment_slots_per_day, diners_per_day, replace = TRUE)
+    day_df <- tibble(
+      day = d,
+      slot = diners_slots,
+      food_weight = rtruncnorm(
+        diners_per_day, a = 100, mean = mn_food_weight, sd = sd_food_weight),
+      meat_fish = sample(
+        c(rep(TRUE, n_meat_fish), rep(FALSE, diners_per_day - n_meat_fish))
+      )
+    ) %>% 
+      mutate(
+        food_weight = pmax(meat_fish*mp$mtfsh_weight[mp$day == d], food_weight),
+        co2e = ifelse(
+          meat_fish,
+          mp$mtfsh_weight[mp$day == d] * mp$mtfsh_co2e[mp$day == d] +
+            (food_weight -  mp$mtfsh_weight[mp$day == d]) * 
+            mp$veg_co2e[mp$day == d],
+          food_weight * mp$veg_co2e[mp$day == d]
+        )
+      )
+    
+    df <- bind_rows(df, day_df)
+  }
+
+  df %>% arrange(day, slot)
+}
+
+apply_teffects <- function(df, mp, tp, te, debug = FALSE) {
+  df2 <- df %>% left_join(tp, by = c("day", "slot")) %>%
+    left_join(te, by = "tment") %>%
+    group_by(day, slot) %>%
+    mutate(
+      food_weight = (1 + rnorm(n(), unique(mn_weight), unique(sd_weight))) * 
+        food_weight,
+      n_meat_fish_treated = max(min(n(), round(
+            rnorm(1, unique(mn_mtfsh), unique(sd_mtfsh)) * n() + sum(meat_fish)
+          )), 0),
+      meat_fish = sample(c(
+        rep(TRUE, unique(n_meat_fish_treated)), 
+        rep(FALSE, n() - unique(n_meat_fish_treated))
+      )),
+      co2e = ifelse(
+        meat_fish,
+        mp$mtfsh_weight[mp$day == unique(day)] * 
+          mp$mtfsh_co2e[mp$day == unique(day)] +
+          (food_weight -  mp$mtfsh_weight[mp$day == unique(day)]) * 
+          mp$veg_co2e[mp$day == unique(day)],
+        food_weight * mp$veg_co2e[mp$day == unique(day)]
+      )
+    ) %>%
+    ungroup() %>%
+    select(-mn_weight, -sd_weight, -mn_mtfsh, -sd_mtfsh, -n_meat_fish_treated)
+  
+  if (debug) {
+    # For debugging only 
+    
+    tef <- df %>%
+      left_join(tp, by = c("day", "slot")) %>%
+      select(day, slot, tment, meat_fish) %>%
+      bind_cols(df2 %>% select(meat_fish_treated = meat_fish)) %>%
+      group_by(day, slot, tment) %>%
+      summarise(
+        teffect = mean(meat_fish_treated) - mean(meat_fish),
+        n = n(),
+        pct_meat_fish_untreated = sum(meat_fish)/n(),
+        meat_fish = sum(meat_fish), 
+        mean_fish_treated = sum(meat_fish_treated),
+        .groups = "drop"
+      )
+    print(kable(tef, "pipe"))
+  }
+  
+  return(df2)
+}
+
+# Style color and theme of ridge plots
+style_ridges_plot <- function(p) {
+  p + 
+    scale_color_manual(
+      values = c("ColorCoded" = "limegreen", "Neutral" = "black"),
+      guide = FALSE
+      ) +
+    theme_minimal() +
+    theme(
+      panel.grid.major.y = element_blank(),
+      axis.ticks.y = element_blank()
+    )
+  }
+
+save_plot <- function(name, h, w){
+  ggsave(paste0(name,".svg"), height = h, width = w)
+  ggsave(paste0(name,".pdf"), height = h, width = w)
+  ggsave(paste0(name,".png"), height = h, width = w)
+}
+
+```
+
+
+### Setting Simulation Parameters
+
+These parameters determine how the simulated sample will be generated. They are based on information that we received from the canteen operator and subject to change. CO2 equivalent measures are based on kgCO2e/kg food.
+
+```{r Parms}
+if (FALSE) {
+  # To verify the CO2 values for parameter list
+  food_co2 <- read_csv("../data/external/food_co2e.csv", col_types = cols())
+  food_co2 %>%  mutate(meat_fish = category %in% c("meat", "fish")) %>%
+    group_by(meat_fish) %>%
+    summarise(mn_co2 = mean(co2_100g)/100, sd_co2 = sd(co2_100g)/100)
+}
+
+
+parms <- list(
+  days = 10,
+  treatment_slots_per_day = 3,
+  mn_diners_per_day = 3250,
+  sd_diners_per_day = 100,
+  friday_churn = 0.75,
+  monday_churn = 0.9,
+  mn_mn_food_weight = 500,
+  sd_mn_food_weight = 50,
+  mn_sd_food_weight = 100,
+  sd_sd_food_weight = 10,
+  prob_meat_fish = 0.6,
+  sd_meat_fish = 0.1,
+  mn_mtfsh_weight = 200,
+  sd_mtfsh_weight = 50,
+  mn_co2e_veg = 2.2,
+  sd_co2e_veg = 2.2,
+  mn_co2e_mtfsh = 8.7,
+  sd_co2e_mtfsh = 11.0
+)
+```
+
+
+### Setting up meal plan
+
+We simulate a meal plan that contains two dishes: Vegetarian and Meat/Fish. Diners can choose whether they add a meat/fish component to their otherwise vegetarian dish. If they do, then the `meat_fish` indicator variable in the diner dataset is being set to true.
+
+```{r MealPlan}
+
+# We need to truncate the mtfsh and vegetable CO2 distribution to enforce
+# that mtfsh always has higher CO2 equivalent per 100g than vegetables
+# In the field, this will be verified by food menue design.
+
+sim_meal_plan <- function() {
+  tibble(
+    day = 1:parms$days,
+    veg_co2e = rtruncnorm(
+      parms$days, 0.2, 3, mean = parms$mn_co2e_veg, sd = parms$sd_co2e_veg
+    ),
+    mtfsh_co2e = rtruncnorm(
+      parms$days, 4, mean = parms$mn_co2e_mtfsh, sd = parms$sd_co2e_mtfsh
+    ),
+    mtfsh_weight = rtruncnorm(
+      parms$days, 100, mean = parms$mn_mtfsh_weight, sd = parms$sd_mtfsh_weight
+    )
+  )
+}
+
+meal_plan <- sim_meal_plan()
+```
+
+
+### Base Sample Descriptives
+
+This is a draw of our base sample (without any treatment)
+
+```{r BaseSampleDesc}
+
+df <- sim_base_sample(parms, meal_plan)
+
+kable(
+  df %>% group_by(day) %>%
+    summarise(
+      diners = n(),
+      meat_fish = mean(meat_fish),
+      mn_food_weight = mean(food_weight),
+      sd_food_weight = sd(food_weight),
+      min_food_weight = min(food_weight),
+      max_food_weight = max(food_weight),
+      mn_co2e = mean(co2e),
+      sd_co2e = sd(co2e),
+      min_co2e = min(co2e),
+      max_co2e = max(co2e)
+    )
+) %>% kable_styling()
+
+ggplot(df) + geom_density(aes(x  = food_weight, color = meat_fish))+
+  scale_color_trr266_d() +
+  theme_trr() 
+
+ggplot(df) + geom_density(aes(x  = co2e, color = meat_fish)) + 
+  scale_color_trr266_d() +
+  theme_trr()
+
+modelsummary(
+  feols(co2e ~ food_weight + meat_fish | day + slot, data = df),
+  stars = TRUE
+)
+```
+
+Our effect sizes are informed by prior literature. 
+```{r PriorEffectSizes}
+
+prior <- read_csv("../data/external/prior_results.csv", col_types = cols())
+
+std_effects <- prior  %>%
+  mutate(
+    poseffect = sign_dummy * effect,
+    std_effect = poseffect/baseline,
+    lb_std_effect = poseffect/baseline - 1.96*stderr/baseline,
+    ub_std_effect = poseffect/baseline + 1.96*stderr/baseline,
+  ) %>%
+  arrange(std_effect) %>%
+  mutate(
+    model = row_number()
+  )
+
+if (file.exists("../data/generated/power_runs.rds")) {
+  df <- readRDS("../data/generated/power_runs.rds")
+  effect_beyer_et_al_h1 <- df %>%
+    filter(test == "h1" & mod == "weight") %>%
+    summarise(
+      area = "Power Results (H1)",
+      authors = "Beyer et al. (TBD)",
+      std_effect = mean(effect),
+      lb_std_effect = std_effect - 1.96*sd(effect),
+      ub_std_effect = std_effect + 1.96*sd(effect),
+      model = nrow(std_effects) + 1,
+    )
+} else {
+  # Power analysis not run yet - let's use canned values
+  effect_beyer_et_al_h1 <- tibble(
+      area = "Power Results (H1)",
+      authors = "Beyer et al. (TBD)",
+      std_effect = -0.0533,
+      lb_std_effect = -0.0620,
+      ub_std_effect = -0.0446,
+      model = 27
+    )
+}
+
+effect_sim <- bind_rows(std_effects, effect_beyer_et_al_h1) %>%
+  arrange(model) %>%
+  mutate(model = factor(model))
+
+ggplot(effect_sim, aes(x = model)) +
+  geom_pointrange(
+    aes(
+      y = std_effect, ymin = lb_std_effect, ymax = ub_std_effect,
+      color = area
+    ),
+    fatten = 0.5
+  ) + 
+  labs(x = "", y = "% Effect to Baseline", color = "Treatment") +
+  scale_y_continuous(labels = scales::percent) + 
+  scale_x_discrete(labels = effect_sim$authors) +
+  scale_color_manual(
+    values = c(col_trr266_petrol, col_trr266_yellow, col_trr266_blue)
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 90, hjust = 0, vjust = 0.5),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank()
+  )
+
+save_plot("../output/figure_1_eff_sizes", 7, 7)
+```
+
+
+### Design treatment plan
+
+Now we specify a treatment pattern. The idea is to make sure that no treatment can be identified by day and slot fixed effects. This means that each treatment has to be administered at least twice and on varying days and on varying slots. We currently have
+
+-   two treatment arms (Neutral, ColorCoded)
+-   five information treatments (NoNumericalInfo, NoContext, Budget, Car, Money)
+
+Assuming ten days and three slots per day, each treatment can be administered once per slot and on three varying days. We should also make sure that the treatment composition varies across days, meaning that the same treatments are not combined on several days. Finally, we also make sure that each day, both treatment arms are present.
+
+```{r TreatmentPlan}
+
+color_cond <- c("Neutral", "ColorCoded")
+info_cond <- c("NoNumericInfo", "NoContext", "Budget", "Car", "Money")
+tments <- expand_grid(
+  color_cond = factor(color_cond, levels = color_cond),
+  info_cond = factor(info_cond, level = info_cond)
+) %>%
+  mutate(tment = sprintf("%s_%s", color_cond, info_cond)) 
+
+tplan <- matrix(
+  NA_character_, parms$days, parms$treatment_slots_per_day
+)
+
+# This could be brute forced or administered via a smart algorithm
+# We did it manually for the time being
+
+tment_str <- tments %>% pull(tment)
+
+tplan[1, ] <- tment_str[c(1, 2, 6)]
+tplan[2, ] <- tment_str[c(3, 7, 8)]
+tplan[3, ] <- tment_str[c(4, 5, 9)]
+tplan[4, ] <- tment_str[c(10, 6, 1)]
+tplan[5, ] <- tment_str[c(2, 3, 7)]
+tplan[6, ] <- tment_str[c(8, 9, 4)]
+tplan[7, ] <- tment_str[c(5, 1, 10)]
+tplan[8, ] <- tment_str[c(6, 8, 3)]
+tplan[9, ] <- tment_str[c(7, 4, 2)]
+tplan[10, ] <- tment_str[c(9, 10, 5)]
+
+# Checks - Need each treatment to be present three times and each slot to 
+# contain all ten treatments - this is the case
+
+if (FALSE) {
+  length(unique(tplan[, 1]))
+  length(unique(tplan[, 2]))
+  length(unique(tplan[, 3]))
+}
+
+table(tplan)
+
+# convert to tibble for later use
+
+tplan <- tibble(
+  day = rep(1:parms$days, each = parms$treatment_slots_per_day),
+  slot = rep(1:parms$treatment_slots_per_day, parms$days),
+  tment = as.vector(t(tplan))
+) %>%
+  left_join(tments, by = "tment")
+  
+```
+
+
+### Specify Expected Treatment Effects
+
+Here we specify some treatment effect estimates. These can be varied to see how our power depends on these assumptions. We have three outcome measures
+
+-   `food_weight`: The amount of food bought (in gram)
+-   `meat_fish`: Whether the diner chose the fish/meat food option
+-   `co2e`: The amount of CO2e consumed, calculated by multiplying the food consumed with its respective CO2e values. As this is a derivative outcome resulting from `foot_weight` and `meat_fish` it does not have a separate treatment effect estimate
+
+```{r EffectSizes}
+
+# To keep things simple for the time being, we estimate food gram effects in 
+# percent consumption to be equal to percentage point effects for the like-
+# likelihood to choose the more carbon intensive fish_meat option 
+# Also, we set all effect standard deviations to zero which is in line with
+# traditional power analyses
+
+nocontext_eff <- -0.02
+budget_eff <- -0.08
+money_eff <- -0.04
+car_eff <- -0.06
+color_eff <- -0.05
+sd_eff = 0.0
+
+neutral_effects <- c(0, nocontext_eff, budget_eff, car_eff, money_eff)
+color_effects <- neutral_effects + color_eff
+
+eff_sizes <- tibble(
+  tment = tments$tment,
+  mn_weight = c(neutral_effects, color_effects),
+  sd_weight = rep(sd_eff, nrow(tments)),
+  mn_mtfsh = mn_weight,
+  sd_mtfsh = sd_weight
+)
+```
+
+
+### Example Analysis
+
+Here we show for one run of the simulation what our main tests would look like in the paper. As we have very strong daily effects, we report the results by day for descriptive purposes.
+
+```{r ExampleAnalysis}
+mp <- sim_meal_plan()
+bs <- sim_base_sample(parms, mp)
+df <- apply_teffects(bs, mp, tplan, eff_sizes)
+
+kable(
+  df %>%
+    group_by(day) %>%
+    summarise(
+      diners = n(),
+      meat_fish = mean(meat_fish),
+      mn_weight = mean(food_weight),
+      sd_weight = sd(food_weight),
+      min_weight = min(food_weight),
+      max_weight = max(food_weight),
+      mn_co2e = mean(co2e),
+      sd_co2e = sd(co2e),
+      min_co2e = min(co2e),
+      max_co2e = max(co2e)
+    )
+  ) %>% kable_styling()  
+
+df <- df %>%
+  mutate(day = as.factor(day), slot = as.factor(slot))
+
+df_viz <- df %>% 
+  mutate(
+    day_tment = factor(
+      (as.numeric(day) - 1) * 4 + as.numeric(slot),
+      levels = 1:39
+    )
+  )
+
+ylabs <- NULL
+for (i in 1:parms$days) {
+  tments <- as.character(tplan$info_cond)
+  tments[tments == "NoNumericInfo"] <- "No Numeric Info"
+  tments[tments == "NoContext"] <- "No Context"
+  row_start <- (i - 1)*parms$treatment_slots_per_day + 1
+  row_end <- i*parms$treatment_slots_per_day
+  ylabs <- c(ylabs, tments[row_start:row_end])
+  if (i < parms$days) ylabs <- c(ylabs, "")
+}
+
+fig <- ggplot(df_viz, aes(x = food_weight, color = color_cond, y = day_tment)) + 
+  geom_density_ridges(fill = NA) + 
+  labs(y = "", x = "Food purchased [grams]") +
+  scale_y_discrete(labels = ylabs, drop = FALSE) + 
+  scale_x_continuous(breaks = c(250, 500, 750))
+
+style_ridges_plot(fig)
+save_plot("../output/figure_2_food_weight", 8, 6)
+
+
+df_viz2 <- df %>% 
+  group_by(day, tment, info_cond, color_cond) %>%
+  summarise(
+    meat_fish = mean(meat_fish),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    label = case_when(
+      info_cond == "NoNumericInfo" ~  fontawesome("fa-question"),
+      info_cond == "NoContext" ~ fontawesome("fa-cloud"),
+      info_cond == "Budget" ~ fontawesome("fa-pie-chart"),
+      info_cond == "Car" ~ fontawesome("fa-car"),
+      info_cond == "Money" ~ fontawesome("fa-eur")
+    ),
+    nudge_left = case_when(
+      day == 1 & info_cond == "NoContext" ~ TRUE,
+      day == 2 & info_cond == "NoContext" ~ TRUE,
+      day == 6 & meat_fish < 0.4 & info_cond == "Car" ~ TRUE,
+      day == 10 & info_cond == "Money" & color_cond == "ColorCoded" ~ TRUE,
+      TRUE ~ FALSE
+    ),
+    nudge_right = case_when(
+      day == 1 & info_cond == "NoNumericInfo" & color_cond == "ColorCoded" ~ TRUE,
+      day == 2 & info_cond == "Budget" & color_cond == "Neutral" ~ TRUE,
+      day == 6 & meat_fish < 0.4 & info_cond == "Budget" ~ TRUE,
+      day == 10 & info_cond == "Money" & color_cond == "Neutral"  ~ TRUE,
+      TRUE ~ FALSE
+    )
+  )
+
+ggplot() + 
+  geom_text(
+    data = df_viz2 %>% filter(!nudge_left & !nudge_right),
+    aes(x = day, y = meat_fish, color = color_cond, label = label), 
+    family='fontawesome-webfont', size = 6
+  ) +
+  geom_text(
+    data = df_viz2 %>% filter(nudge_left),
+    aes(x = day, y = meat_fish, color = color_cond, label = label), 
+    family='fontawesome-webfont', size = 6,
+    position = position_nudge(x = -0.15)
+  ) +
+  geom_text(
+    data = df_viz2 %>% filter(nudge_right),
+    aes(x = day, y = meat_fish, color = color_cond, label = label), 
+    family='fontawesome-webfont', size = 6,
+    position = position_nudge(x = +0.15)
+  ) +
+  scale_color_manual(
+    values = c("ColorCoded" = "limegreen", "Neutral" = "black"),
+    guide = FALSE
+  ) +
+  scale_y_continuous(labels = scales::label_percent(accuracy = 1L)) + 
+  labs(x = "Day", y = "Share of meat or fish dishes") +
+  theme_minimal()
+
+save_plot("../output/figure_3_food_choice", 6, 6)
+
+fig <- ggplot(df_viz, aes(x = co2e/1000, color = color_cond, y = day_tment)) + 
+  geom_density_ridges(fill = NA) + 
+  labs(y = "", x = "Carbon footprint [kgCO\u2082e]") +
+  scale_y_discrete(labels = ylabs, drop = FALSE) + 
+  scale_x_continuous(breaks = c(0, 2.5, 5.0, 7.5))
+
+style_ridges_plot(fig)
+save_plot("../output/figure_4_food_co2e", 8, 6)
+
+
+weight_mod <- feols(
+  log(food_weight) ~ info_cond*color_cond| day + slot, 
+  df, cluster = c("day", "slot")
+)
+mtfsh_mod <- femlm(
+  meat_fish ~ info_cond*color_cond| day + slot, 
+  family = "logit", df, cluster = c("day", "slot")
+)
+mtfsh_mod_ols <- feols(
+  meat_fish ~ info_cond*color_cond| day + slot, 
+  df, cluster = c("day", "slot")
+)
+co2e_mod <- feols(
+  log(co2e) ~ info_cond*color_cond| day + slot, 
+  df, cluster = c("day", "slot")
+)
+
+
+modelsummary(
+  list(
+    weight = weight_mod, meat_fish_logit = mtfsh_mod, co2e = co2e_mod
+  ),
+  stars = TRUE
+)
+
+test_hypothesis <- function(mod, test) {
+  rv <- car::linearHypothesis(mod, test)
+  tibble(
+    effect = unname(attr(rv, "value")[1,1]),
+    pvalue = rv[2, 4],
+    starred = sprintf(
+      "%.3f%s", effect, 
+      case_when(
+        pvalue < 0.01 ~ "***",
+        pvalue < 0.05 ~ "**",
+        pvalue < 0.1 ~ "*",
+        TRUE ~ ""
+      )
+    )
+  )
+}
+
+construct_lin_hypothesis <- function(df) {
+  no_info <- info_cond[1]
+  info_weights <- pull(
+    df %>% filter(info_cond != no_info) %>% group_by(info_cond) %>% 
+      summarise(share = n()/nrow(df))
+  ) 
+  
+  pres_weight <- sum(df$color_cond == color_cond[1])/nrow(df)
+  
+  h1_test <- paste0(
+    paste0(
+      info_weights/sum(info_weights), " * info_cond", info_cond[-1], collapse = " + "
+    ), " + ", 
+    paste0(
+      info_weights/sum(info_weights) * pres_weight, " * ", 
+      "info_cond", info_cond[-1], ":color_cond", color_cond[2], collapse = " + "
+    ),
+    " = 0"
+  )
+  
+  h2_test <- paste0(
+    "- info_cond", info_cond[2], " ", -pres_weight, 
+    " * info_cond", info_cond[2], ":color_cond", color_cond[2], " + ", 
+    paste0(
+      info_weights[2:4]/sum(info_weights[2:4]), " * info_cond", info_cond[3:5], 
+      collapse = " + "
+    ), 
+    " + ",
+    paste0(
+      info_weights[2:4]/sum(info_weights[2:4]) * pres_weight,  
+      " * info_cond", info_cond[3:5], ":color_cond", color_cond[2], collapse = " + "
+    ),
+    " = 0"
+  )
+  
+  h3a_test <- paste0(
+    "info_cond", info_cond[3], " + ", pres_weight, 
+    " * info_cond", info_cond[3], ":color_cond", color_cond[2], " - ", 
+    "info_cond", info_cond[4], " - ", pres_weight,  
+    " * info_cond", info_cond[4], ":color_cond", color_cond[2], 
+    " = 0"
+  )
+  
+  h3b_test <- paste0(
+    "info_cond", info_cond[4], " + ", pres_weight, 
+    " * info_cond", info_cond[4], ":color_cond", color_cond[2], " - ", 
+    "info_cond", info_cond[5], " - ", pres_weight,  
+    " * info_cond", info_cond[5], ":color_cond", color_cond[2], 
+    " = 0"
+  )
+  
+  h4_test <- paste0(
+    "color_cond", color_cond[2], " + ", 
+    paste0(
+      paste0(pull(
+        df %>% filter(info_cond != no_info) %>% group_by(info_cond) %>% 
+          summarise(share = n()/nrow(df))
+      ) , " * "), 
+      "info_cond", info_cond[-1], ":color_cond", color_cond[2], collapse = " + "
+    ),
+    " = 0"
+  )
+  return(c(
+    h1 = h1_test,
+    h2 = h2_test,
+    h3a = h3a_test,
+    h3b = h3b_test,
+    h4 = h4_test
+  ))
+} 
+
+lh <- construct_lin_hypothesis(df)
+
+hresults <- matrix(NA_character_, 5, 3)
+
+col <- 0
+for (mod in list(weight_mod, mtfsh_mod, co2e_mod)) {
+  col <- col + 1
+  hresults[1, col] <- test_hypothesis(mod, lh["h1"])$starred
+  hresults[2, col] <- test_hypothesis(mod, lh["h2"])$starred
+  hresults[3, col] <- test_hypothesis(mod, lh["h3a"])$starred
+  hresults[4, col] <- test_hypothesis(mod, lh["h3b"])$starred
+  hresults[5, col] <- test_hypothesis(mod, lh["h4"])$starred
+}
+rownames(hresults) <- c("H1", "H2", "H3a", "H3b", "H4")
+colnames(hresults) <- c("weight_mod", "mtfsh_mod", "co2e_mod")
+
+kable(hresults) %>% kable_styling()
+```
+
+
+### Calculating Power
+
+Now we estimate the power for our hypotheses tests by
+
+-   simulating a base sample,
+-   applying treatment effects,
+-   running the analysis on the treated sample,
+-   performing our hypothesis tests,
+-   capturing the effects and the confidence intervals,
+-   verifying whether they are significantly different from zero,
+-   repeating this procedure a given number of times and
+-   reporting the share of hypothesis tests that are significant.
+
+```{r EstimatePower}
+test_hypotheses <- function(df, level) {
+  weight_mod <- feols(
+    log(food_weight) ~ info_cond*color_cond| day + slot, 
+    cluster = c("day", "slot"), df
+  )
+  mtfsh_mod <- femlm(
+    meat_fish ~ info_cond*color_cond| day + slot, family = "logit", 
+    cluster = c("day", "slot"), df
+  )
+  co2e_mod <- feols(
+    log(co2e) ~ info_cond*color_cond| day + slot, 
+    cluster = c("day", "slot"), df
+  )
+
+  bind_cols(
+    expand_grid(
+      mod = c("weight", "mtfsh", "co2e"),
+      test = c("h1", "h2", "h3a", "h3b", "h4")
+    ),
+    bind_rows(lapply(
+    list(weight_mod, mtfsh_mod, co2e_mod),
+    function(mod) {
+      bind_rows(lapply(
+        construct_lin_hypothesis(df),
+        function(test) test_hypothesis(mod, test)
+      ))
+    }
+    ))
+  )
+}
+
+run_sim <- function(p, tp, te) {
+  mp <- sim_meal_plan()
+  bs <- sim_base_sample(p, mp)
+  df <- apply_teffects(bs, mp, tp, te)
+  test_hypotheses(df)
+}
+
+if (file.exists("../data/generated/power_runs.rds")) {
+  df <- readRDS("../data/generated/power_runs.rds")
+} else {
+  df <- do.call(
+    rbind, 
+    replicate(1000, run_sim(parms, tplan, eff_sizes), simplify = FALSE)
+  )
+  saveRDS(df, "../data/generated/power_runs.rds")
+}
+
+sim_results <-  df %>% group_by(mod, test) %>%
+  filter(!is.na(pvalue) & pvalue != 1) %>%
+  summarise(
+    n = n(),
+    mn_effect = mean(effect),
+    sd_effect = sd(effect),
+    pct_sig_neg = mean(pvalue < 0.05 & effect < 0),
+    pct_sig_pos = mean(pvalue < 0.05 & effect > 0)
+  ) %>%
+  pivot_wider(
+    id_cols = test, names_from = mod,
+    values_from = c(n, mn_effect, sd_effect, pct_sig_pos, pct_sig_neg),
+    names_glue = "{mod}_{.value}"
+  ) %>%
+  select(test, starts_with("weight"), starts_with("mtfsh"), starts_with("co2e"))
+  
+kable(sim_results) %>% kable_styling()
+```
+
+
+### Power by Effect Size
+
+How does the power of a single treatment vary relative to its (differential) effect size?
+
+```{r PowerDiff}
+
+test_diff <- function(p, tp, te) {
+  mp <- sim_meal_plan()
+  bs <- sim_base_sample(p, mp)
+  df <- apply_teffects(bs, mp, tp, te)
+ 
+  weight_mod <- feols(
+    log(food_weight) ~ info_cond*color_cond| day + slot, 
+    cluster = c("day", "slot"), df
+  )
+  mtfsh_mod <- femlm(
+    meat_fish ~ info_cond*color_cond| day + slot, family = "logit", 
+    cluster = c("day", "slot"), df
+  )
+  co2e_mod <- feols(
+    log(co2e) ~ info_cond*color_cond| day + slot, 
+    cluster = c("day", "slot"), df
+  )
+
+  
+  pres_weight <- sum(df$color_cond == "ColorCoded")/nrow(df)
+  
+  diff_test <- paste0(
+    "info_condNoContext + ", pres_weight, " * info_condNoContext:color_condColorCoded = 0"
+  )
+  
+  bind_cols(
+    mod = c("weight", "mtfsh", "co2e"),
+    bind_rows(lapply(
+      list(weight_mod, mtfsh_mod, co2e_mod),
+      function(mod) {
+        test_hypothesis(mod, diff_test)
+      }
+    ))
+  )   
+}
+
+if (file.exists("../data/generated/power_differential_effects.rds")) {
+  df <- readRDS("../data/generated/power_differential_effects.rds")
+} else {
+  prot <- expand_grid(
+    run = 1:1000,
+    diff_effect = seq(-0.0, -0.10, length.out = 21)
+  )
+  
+  run_protocol <- function(n) {
+    df <- prot[n, ]
+    te <- eff_sizes
+    te[te$tment == "Neutral_NoContext", "mn_weight"] <- df$diff_effect
+    te[te$tment == "ColorCoded_NoContext", "mn_weight"] <- df$diff_effect + color_eff 
+    te[te$tment == "Neutral_NoContext", "mn_mtfsh"] <- df$diff_effect
+    te[te$tment == "ColorCoded_NoContext", "mn_mtfsh"] <- df$diff_effect + color_eff
+    message(sprintf(
+      "Running run %d with parameter %.3f", df$run, df$diff_effect
+    ))
+    bind_cols(df, test_diff(parms, tplan, te))
+  }
+  
+  df <- bind_rows(
+    lapply(1:nrow(prot), run_protocol)
+  )
+  
+  saveRDS(df, "../data/generated/power_differential_effects.rds")
+}
+
+df %>%
+  group_by(mod, diff_effect) %>%
+  summarise(
+    alpha = mean(effect < 0 & pvalue < 0.05),
+    .groups = "drop"
+  ) %>%
+  ggplot(aes(x = diff_effect, y = alpha, color = mod, shape = mod)) + 
+  geom_point() +
+  geom_line() +
+  labs(y = "Power", x = "Treatment effect differential [percentage points]")+
+  scale_y_continuous(breaks = seq(0, 1, by = 0.2)) +
+    geom_hline(yintercept = 0.8, color = col_trr266_red, lty = 2) +
+    scale_shape_manual(
+      values = c("co2e" = 16, "mtfsh" = 15, "weight" = 17),
+      name = "Dependent variables",
+      labels = c("CO\u2082 emission", "Choice for meat or fish", "Food weight")
+      ) +
+    scale_color_manual(
+      values = c("co2e" = col_trr266_petrol, "mtfsh" = col_trr266_yellow, "weight" = col_trr266_blue),
+      name = "Dependent variables",
+      labels = c("CO\u2082 emission", "Choice for meat or fish", "Food weight")
+      )+
+    theme_minimal() +
+    theme(
+      legend.position = "bottom"
+    )
+
+save_plot("../output/figure_5_power", 6, 6)
+```
+

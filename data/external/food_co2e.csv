@@ -1,0 +1,54 @@
+category,food,co2_100g
+basis,Bulgur,76
+basis,Chickpeas,85
+basis,Couscous,244
+basis,Lentils,67
+basis,Oats,79
+basis,Pasta,137
+basis,Quinoa,82
+basis,Rice,135
+vegetable,Asparagus,703
+vegetable,Aubergine,310
+vegetable,Beetroot,114
+vegetable,Broccoli,108
+vegetable,Cabbage,62
+vegetable,Carrot,113
+vegetable,Cauliflower,97
+vegetable,Corn,41
+vegetable,Cucumber,193
+vegetable,Garlic,45
+vegetable,Green beans,467
+vegetable,Lettuce,161
+vegetable,Mushrooms,140
+vegetable,Onion,105
+vegetable,Peas,423
+vegetable,Peppers,202
+vegetable,Potatoes,127
+vegetable,Spinach,146
+vegetable,Spring onion,105
+vegetable,Sweet potato,127
+vegetable,Tomatoes,291
+dairy,Butter,976
+dairy,Buttermilk,110
+dairy,Cheese,879
+dairy,Eggs,451
+dairy,Milk,176
+dairy,Sour cream,250
+dairy,Yogurt,220
+other,Falafel,251
+other,Oatly Oat Drink,32
+other,Tofu,186
+meat,Beef,4333
+meat,Chicken,471
+meat,Duck,505
+meat,Pork,663
+meat,Turkey,645
+meat,Lamb,2083
+fish,Anchovies,422
+fish,Cod,321
+fish,Fish sticks,191
+fish,Halibut,436
+fish,Herring,159
+fish,Salmon,479
+fish,Seabass,436
+fish,Tuna,1016
