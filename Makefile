@@ -1,6 +1,6 @@
 # If you are new to Makefiles: https://makefiletutorial.com
 
-POWER := power_analysis.html
+POWER := output/power_analysis.html
 
 TARGETS :=  $(POWER)
 
@@ -20,4 +20,4 @@ dist-clean: clean
 
 $(POWER): doc/power_analysis.Rmd code/R/linear_hypothesis_testing_fixest.R
 	$(RSCRIPT) -e 'library(rmarkdown); render("doc/power_analysis.Rmd")'
-	mv doc/power_analysis.html .
+	mv doc/power_analysis.html output/
