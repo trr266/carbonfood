@@ -6,7 +6,7 @@ We a are planning to run a large-scale field experiment to assess how attributes
 
 Currently, this repository contains this power analysis along with some auxiliary data. You can take a [look at it here](https://trr266.de/carbonfood/power_analysis.html). If you want to work with the R code itself, it resides in the `doc` directory. You can knit either manually or by running `make all` (assuming that you have a working make environment installed - see below for details).
 
-Feel to reach out to the authors for questions and/or feedback.
+Feel free to reach out to the authors for questions and/or feedback.
 
 
 ### How do I reproduce the analysis?
