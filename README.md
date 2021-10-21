@@ -2,7 +2,7 @@
 
 This is the repository of a project on the impact of carbon footprint information on consumer choice, co-authored by Bianca Beyer, Rico Chaskel, Simone Euler, Joachim Gassen, Ann-Kristin Großkopf and Thorsten Sellhorn. It is being developed within project B04 ("Real Effects of Transparency") of the [TRR 266 "Accounting for Transparency"](https://www.accounting-for-transparency.de).
 
-We are planing to run a large-scale field experiment to assess how attributes of carbon footprint information affect consumer choice. Partnering with a large canteen operator, we manipulate the understandability, mental accounting framing, and salience of carbon footprint food labels in a natural setting. We then measure differences in subjects' food choices with regard to (1) the type of dish selected (high- or low-carbon dishes), (2) the total amount of food chosen, and (3) the carbon footprint of the food chosen. A fully parameterized simulation-based power analysis indicates that the expected features of our setting provide sufficient statistical power to find the predicted effects, if true, at conventional significance levels, making ultimate experimental results interpretable regardless of the outcome.
+We are planning to run a large-scale field experiment to assess how attributes of carbon footprint information affect consumer choice. Partnering with a large canteen operator, we manipulate the understandability, mental accounting framing, and salience of carbon footprint food labels in a natural setting. We then measure differences in subjects' food choices with regard to (1) the type of dish selected (high- or low-carbon dishes), (2) the total amount of food chosen, and (3) the carbon footprint of the food chosen. A fully parameterized simulation-based power analysis indicates that the expected features of our setting provide sufficient statistical power to find the predicted effects, if true, at conventional significance levels, making ultimate experimental results interpretable regardless of the outcome.
 
 Currently, this repository contains this power analysis along with some auxiliary data. You can take a [look at it here](https://trr266.de/carbonfood/power_analysis.html). If you want to work with the R code itself, it resides in the `doc` directory. You can knit either manually or by running `make all` (assuming that you have a working make environment installed - see below for details).
 
@@ -18,8 +18,8 @@ Assuming that you have RStudio and make/Rtools installed, this should be relativ
 3. Run 'make all' either via the console or by identifying the 'Build All' button in the 'Build' tab (normally in the upper right quadrant of the RStudio screen). 
 4. Eventually, you will be greeted with the file `power_analysis.html` and some other files in the `output` directory. Congratulations! 
 
-If you do not see a 'Build' tab, this is most likely because you do not have 'make' installed on your system. 
-  - For Windows: Install Rtools: https://cran.r-project.org/bin/windows/Rtools/
+If you do not see a 'Build' tab this is most likely because you do not have 'make' installed on your system. 
+  - For Windows: Install Rtools: https://cran.r-project.org/bin/windows/Rtools/.
   - For MacOS: You need to install the Mac OS developer tools. Open a terminal and run `xcode-select --install`. Follow the instructions.
   - On Linux: We have never seen a Unix environment without 'make'. 
 
