@@ -1,0 +1,218 @@
+---
+title: "Mena plan analysis"
+author: "The authors of Beyer et al."
+date: "20 12 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(lubridate)
+library(gridExtra)
+library(ggrepel)
+library(ExPanDaR)
+library(kableExtra)
+devtools::source_url(
+  "https://raw.githubusercontent.com/trr266/treat/main/code/R/theme_trr.R"
+)
+
+```
+
+```{r functions, include=FALSE}
+
+save_plot <- function(name, h, w){
+  ggsave(paste0(name,".svg"), height = h, width = w, bg = "transparent")
+  ggsave(paste0(name,".pdf"), height = h, width = w)
+  ggsave(paste0(name,".png"), height = h, width = w)
+}
+
+save_grid <- function(name, plot, h, w){
+  ggsave(paste0(name,".svg"), plot, height = h, width = w, bg = "transparent")
+  ggsave(paste0(name,".pdf"), plot, height = h, width = w)
+  ggsave(paste0(name,".png"), plot, height = h, width = w)
+}
+```
+
+### Calories and CO2-Emissions
+
+In order to make an informed decision about our mensa choices, we want to understand the correlation between kcal and CO2. Therefore, we take CO2-data from Myemissions (https://myemissions.green/food-carbon-footprint-calculator/) and kcal-data from Max-Rubner-Institut featered by Apotheken Umschau (https://www.apotheken-umschau.de/gesund-bleiben/abnehmen/rechner-wie-viele-kalorien-enthaelt-ihr-lebensmittel-710327.html).
+
+
+```{r kcalco2}
+ghg <- read_xlsx("../data/external/co2-emissions-for-food.xlsx") %>%
+  clean_names() %>%
+  mutate(kcal = ifelse(is.na(calories_kcal_apotheke),calories_kcal_kalorientabelle, calories_kcal_apotheke)) %>%
+  select(food_category, food_item, emissions_g_co2e, kcal)
+
+ghg %>%
+  ggplot(aes(x = kcal, y = emissions_g_co2e, color = food_category)) +
+  geom_point(size=2) + 
+  theme_minimal()+ 
+  scale_color_trr266_d() +
+  labs(x = "Calories in kcal/100g",
+       y = "GHG emissions in gCO2/100g")+
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        rect = element_rect(fill = "transparent")) 
+save_plot("../output/corr_kcalco2_all", 7, 7)
+
+options(ggrepel.max.overlaps = Inf)
+ghg %>%
+  filter(emissions_g_co2e < 2000) %>%
+  ggplot(aes(x = kcal, y = emissions_g_co2e, color = food_category)) +
+  geom_point(size = 2) + 
+  geom_text_repel(aes(label = food_item)) +
+  theme_minimal()+ 
+  scale_color_trr266_d() +
+  labs(x = "Calories in kcal/100g",
+       y = "GHG emissions in gCO2/100g")+
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        rect = element_rect(fill = "transparent")) 
+save_plot("../output/corr_kcalco2_subsample", 7, 7)
+
+corr_table <- ghg %>%  prepare_correlation_table() 
+corr_table$kable %>% kable_classic(full_width = F, html_font = "Cambria")
+```
+
+### Analysing pattern from old menu plan
+
+Through a wayback machine we got the menu plan around May from 2016, 2017, and 2018.
+
+```{r loadmenuplan}
+sp <- read_xlsx("../data/external/mensa_speiseplan.xlsx") %>%
+  clean_names() %>%
+  mutate(jahr = year(datum),
+         vegetarisch = as.factor(vegetarisch),
+         gericht = tolower(gericht)) %>% 
+  select(jahr, datum, wochentag, gericht, vegetarisch, kategorie, kennzeichnung) %>%
+  mutate(wochentag = str_replace_all(wochentag, "Montag", "Mo"),
+         wochentag = str_replace_all(wochentag, "Dienstag", "Tu"),
+         wochentag = str_replace_all(wochentag, "Mittwoch", "We"),
+         wochentag = str_replace_all(wochentag, "Donnerstag", "Th"),
+         wochentag = str_replace_all(wochentag, "Freitag", "Fr"))
+
+
+#How many vegetarian vs. meat/fish options per day?
+fish <- c("scholle", "lachs", "shrimps", "fisch", "kabeljau", "frutti di mare")
+
+sp <- sp %>% 
+  mutate(fish = str_detect(gericht, paste(fish, collapse = '|')),
+         category = ifelse(vegetarisch == 0 & fish == TRUE, "fish", NA),
+         category = ifelse(vegetarisch == 0 & fish == FALSE, "meat", category),
+         category = ifelse(vegetarisch == 1, "veggie", category))
+
+pasta <- c("pasta", "nudel", "penne", "spaghetti")
+potato <- c("kartoffel", "gnocci")
+stew <- c("eintopf", "suppe")
+rice <- c("reis")
+
+sp_new <- sp %>%
+  mutate(pasta = str_detect(gericht, paste(pasta, collapse = '|')),
+         potato = str_detect(gericht, paste(potato, collapse = '|')), 
+         stew = str_detect(gericht, paste(stew, collapse = '|')), 
+         rice = str_detect(gericht, paste(rice, collapse = '|'))
+         )
+
+```
+
+We that we have normally six dishes per day. Friday constitute an exemptions, we have often only four dishes per day. 
+
+```{r dishperday}
+day <- sp %>%
+  group_by(jahr, wochentag, datum) %>%
+  count() %>%
+  rename(number_per_day = n)
+
+plot_dish_per_day <- function(year, col){
+  day %>%
+  filter(jahr == year) %>%
+  ggplot(aes(x = datum, y = number_per_day, label = wochentag)) +
+  geom_bar(stat = "identity", fill = col)+
+  theme_trr() + 
+  geom_text(size = 3, position = position_stack(vjust = 0), hjust = 0,angle = 90)+
+  labs(x=" ",
+       y=year)
+}
+
+p1 <- plot_dish_per_day("2016", col_trr266_petrol)
+p2 <- plot_dish_per_day("2017", col_trr266_yellow)
+p3 <- plot_dish_per_day("2018", col_trr266_red)
+
+grid <- grid.arrange(p1,p2,p3, nrow = 3, top = "Number of dishes per day")
+ggsave("number_of_dishes.png", grid, height = 8, width = 8)
+
+
+day_sum <- day %>%
+  group_by(wochentag) %>%
+  summarize(day = n(),
+            number_per_day = sum(number_per_day))%>%
+  mutate(per_day = number_per_day/day)
+
+day_sum$wochentag <- factor(day_sum$wochentag,
+                  levels = c("Mo", "Tu", "We", "Th", "Fr"))
+day_sum %>%
+  ggplot(aes(x = wochentag, y = per_day)) +
+  geom_bar(stat = "identity", fill = col_trr266_petrol)+
+  theme_minimal() + 
+  labs(x=" ",
+       y="Number of dishes")
+
+```
+
+```{r categoryperday}
+category <- sp %>%
+  group_by(jahr, datum, wochentag, category) %>%
+  count() %>%
+  rename(number_per_category = n)
+
+category_day <- category %>%
+  left_join(day, by = c("datum", "wochentag", "jahr")) %>%
+  mutate(pct_dish_category = number_per_category/number_per_day)
+
+plot_category_per_day <- function(year){
+  category_day %>%
+  filter(jahr == year) %>%
+  ggplot(aes(x = datum, y = pct_dish_category, fill = category))+
+  geom_bar(stat = "identity", position = "fill") +
+  theme_trr()+
+  scale_fill_manual(
+    values = c("fish" = col_trr266_petrol, "meat" = col_trr266_red, "veggie" = col_trr266_yellow),
+    labels = c("Fish", "Meat", "Vegetarian")
+    )+
+  theme(legend.position = "bottom")+
+  geom_text(aes(label=ifelse(category=="veggie",paste(wochentag)," ")), size = 3, position = position_stack(vjust = 0.0), hjust = 0, angle = 90)+
+  labs(x=" ",
+       y= year)
+}
+
+p1<-plot_category_per_day("2016")
+p2<-plot_category_per_day("2017")
+p3<-plot_category_per_day("2018")
+grid <- grid.arrange(p1,p2,p3, nrow = 3, top = "Meal category per day")
+ggsave("meal_category.png", grid, height = 8, width = 8)
+
+
+category_day_sum <- category_day %>%
+  group_by(wochentag, category)%>%
+  summarize(number_per_category = sum(number_per_category)) %>%
+  left_join(day_sum, by = "wochentag") %>%
+  mutate(pct_dish_category = number_per_category/number_per_day)
+
+category_day_sum$wochentag <- factor(category_day_sum$wochentag,
+                  levels = c("Mo", "Tu", "We", "Th", "Fr"))
+
+category_day_sum %>%
+  ggplot(aes(x = wochentag, y = pct_dish_category, fill = category))+
+  geom_bar(stat = "identity", position = "fill")+
+  theme_trr()+
+  scale_fill_manual(
+    values = c("fish" = col_trr266_petrol, "meat" = col_trr266_red, "veggie" = col_trr266_yellow),
+    labels = c("Fish", "Meat", "Vegetarian")
+    )+
+  theme(legend.position = "bottom")+
+  labs(x=" ",
+       y= " ")
+```
