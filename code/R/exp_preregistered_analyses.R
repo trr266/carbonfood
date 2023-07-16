@@ -45,7 +45,8 @@ prepare_prereg_analyses <- function(unit_obs) {
   dir.create(ofolder <- tempfile())
   
   smp <- readRDS(paste0("data/generated/exp_sample_", unit_obs, ".rds"))
-  tplan <- read_csv("data/experiment/treatment_plan.csv", show_col_types = FALSE) %>%
+  tplan <- readRDS("data/generated/old/tment_data.rds") %>%
+    select(eday, cday, tslot1, tslot2, exp_eff_size) %>%
     mutate(day = c(1:8, NA, 10, 9)) %>% filter(eday != 9) %>% arrange(day)
   
   df <- smp %>%
