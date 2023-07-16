@@ -18,8 +18,6 @@ library(kableExtra)
 library(modelsummary)
 library(ggridges)
 library(emojifont)
-library(googlesheets4)
-library(readxl)
 
 load.fontawesome()
 source("../code/R/linear_hypothesis_testing_fixest.R")
@@ -27,6 +25,8 @@ source("../code/R/linear_hypothesis_testing_fixest.R")
 devtools::source_url(
   "https://raw.githubusercontent.com/trr266/treat/main/code/R/theme_trr.R"
 )
+
+dir.create(ofolder <- tempfile())
 
 set.seed(12)
 ```
@@ -323,7 +323,7 @@ ggplot(effect_sim, aes(x = model)) +
     panel.grid.minor.x = element_blank()
   )
 
-save_plot("../output/figure_1_eff_sizes", 7, 7)
+save_plot(paste0(ofolder, "/figure_1_eff_sizes"), 7, 7)
 ```
 
 
@@ -470,8 +470,10 @@ fig <- ggplot(df_viz, aes(x = food_weight, color = color_cond, y = day_tment)) +
   scale_y_discrete(labels = ylabs, drop = FALSE) + 
   scale_x_continuous(breaks = c(250, 500, 750))
 
-style_ridges_plot(fig)
-save_plot("../output/figure_2_food_weight", 8, 6)
+suppressMessages({
+  style_ridges_plot(fig)
+  save_plot(paste0(ofolder, "/figure_2_food_weight"), 8, 6)
+})
 
 
 df_viz2 <- df_viz %>% 
@@ -524,7 +526,7 @@ ggplot() +
   labs(x = "Day", y = "Share of meat or fish dishes") +
   theme_minimal()
 
-save_plot("../output/figure_3_food_choice", 6, 6)
+save_plot(paste0(ofolder, "figure_3_food_choice"), 6, 6)
 
 fig <- ggplot(df_viz, aes(x = co2e/1000, color = color_cond, y = day_tment)) + 
   geom_density_ridges(fill = NA) + 
@@ -532,9 +534,10 @@ fig <- ggplot(df_viz, aes(x = co2e/1000, color = color_cond, y = day_tment)) +
   scale_y_discrete(labels = ylabs, drop = FALSE) + 
   scale_x_continuous(breaks = c(0, 2.5, 5.0, 7.5))
 
-style_ridges_plot(fig)
-save_plot("../output/figure_4_food_co2e", 8, 6)
-
+suppressMessages({
+  style_ridges_plot(fig)
+  save_plot(paste0(ofolder, "/figure_4_food_co2e"), 8, 6)
+})
 
 weight_mod <- feols(
   log(food_weight) ~ tment| day + slot, 
@@ -631,11 +634,11 @@ colnames(hresults) <- c("weight_mod", "mtfsh_mod", "co2e_mod")
 
 kable(hresults) %>% kable_styling()
 
-# Save all results for slide deck
+# Save all results for later use
 
 save(
   parms, mp, bs, df, weight_mod, mtfsh_mod, co2e_mod, hresults, 
-  file = "../output/pa_example_run.rdata"
+  file = paste0(ofolder, "/pa_example_run.rdata")
 )
 ```
 
@@ -814,6 +817,16 @@ df %>%
       legend.position = "bottom"
     )
 
-save_plot("../output/figure_5_power", 6, 6)
+save_plot(paste0(ofolder, "/figure_5_power"), 6, 6)
+
+# Zip the content of the temp folder to the output folder
+
+projectwd <- getwd()
+setwd(ofolder)
+zip(
+  paste0(projectwd, "/../output/power_sim_output.zip"), 
+  list.files()
+)
+setwd(projectwd)
 ```
 

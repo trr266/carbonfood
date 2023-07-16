@@ -1,4 +1,9 @@
 # Adapted from car::linearHypothesis.default
+# This code has been used for the power simulation during
+# the pre registration. The code for evaluating the experimental
+# evidence uses the 'marginaleffects' package yielding
+# identical insights. 
+
 library(car)
 
 linearHypothesis.fixest <- function (
@@ -98,6 +103,7 @@ if (FALSE) {
   # Some testing
   library(tidyverse)
   library(car)
+  library(lmtest)
   library(fixest)
   
   check_fixest_wald <- function(firms = 10, years = 3, se = NULL) {
@@ -132,14 +138,10 @@ if (FALSE) {
       ols_p_wald = lh_ols[2, 6],
       fedm_p_coef = coeftest(fedm, df = degrees_freedom(fedm, "t"))[1, 4],
       fedm_p_wald = lh_fedm[2, 4],
-      feest_p_coef = coeftest(feest, df = degrees_freedom(fedm, "t"))[2, 4],
+      feest_p_coef = coeftest(feest, df = degrees_freedom(feest, "t"))[2, 4],
       feest_p_wald = lh_feest[2, 4]
     )
   }
   
-  
-  
   df <- bind_rows(replicate(10, check_fixest_wald(), simplify = FALSE))
-  
-  
 }
