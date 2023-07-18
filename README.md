@@ -28,7 +28,7 @@ If you have RStudio and make/Rtools installed, the process should be relatively 
 
 1. Download, clone or fork this repository to your local computing environment.
 2. Before building everything you most likely need to install additional packages. See the code below for installing the packages.
-3. Run 'make all' either via the console or by identifying the 'Build All' button in the 'Build' tab (normally in the upper right quadrant of the RStudio screen). 
+3. Run 'make all' either via the terminal or by identifying the 'Build All' button in the 'Build' tab (normally in the upper right quadrant of the RStudio screen). 
 4. Eventually, you will be greeted with several files in the `data/generated` and `output` directories containing our generated data and analysis. Congratulations! 
 
 If you do not see a 'Build' tab this is most likely because you do not have 'make' installed on your system. 
@@ -37,7 +37,7 @@ If you do not see a 'Build' tab this is most likely because you do not have 'mak
 - For MacOS: You need to install the Mac OS developer tools. Open a terminal and run `xcode-select --install`. Follow the instructions.
 - On Linux: We have never seen a Unix environment without 'make'. 
 
-**Please note:** Because of the power simulation and the researcher degree of freedom analysis, reproducing all elements takes several hours. You can instead only reproduce subsets of the analysis by running `make power`, `make findings`, or `make rdf`. 
+**Please note:** Because of the power simulation and the researcher degree of freedom analysis, reproducing all elements would take several hours. To cut down on this, `make all` uses static versions of these data files (stored in `static`). If you want to reproduce these files, you need to run `make dist-clean`, followed by `make all`. You can also just reproduce subsets of the analysis by running `make power`, `make findings`, or `make rdf`. 
 
 ```
 # Code to install packages to your system
@@ -49,6 +49,7 @@ install_package_if_missing("lubridate")
 install_package_if_missing("fixest")
 install_package_if_missing("mlogit")
 install_package_if_missing("truncnorm")
+install_package_if_missing("rmarkdown")
 install_package_if_missing("knitr")
 install_package_if_missing("kableExtra")
 install_package_if_missing("modelsummary")
