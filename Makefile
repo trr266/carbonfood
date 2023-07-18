@@ -47,7 +47,7 @@ EXP_RESULTS := $(EXP_DEBRIEFING_FIGURES) $(EXP_PREREG_OUTPUT) $(EXP_ADD_OUTPUT)
 # Targets for RDF analysis
 
 RDF_OUTCOMES := output/rdf_code_doc.pdf output/rdf_flowchart.pdf \
-  data/generated/rdf_outcomes.rds
+	data/generated/rdf_outcomes.rds
 
 RDF_SPEC_CURVES := output/rdf_spec_curves.zip
 
@@ -62,7 +62,7 @@ STATIC_POWER_SIM_DATA := static/power_runs.rds \
 STATIC_DEBRIEFING_FIGURE := static/debriefing_res_exp.svg
 
 STATIC_RDF_OUTCOMES := static/rdf_code_doc.pdf static/rdf_flowchart.pdf \
-  static/rdf_outcomes.rds
+	static/rdf_outcomes.rds
   
 STATIC_TARGETS :=  $(STATIC_POWER_SIM_DATA) $(STATIC_DEBRIEFING_FIGURE) \
   $(STATIC_RDF_OUTCOMES)
@@ -98,17 +98,17 @@ dist-clean: clean
 # Recipes for targets
 
 $(STATIC_POWER_SIM_DATA): doc/power_analysis.Rmd \
-  code/R/linear_hypothesis_testing_fixest.R
+	code/R/linear_hypothesis_testing_fixest.R
 	$(RSCRIPT) -e 'library(rmarkdown); render("doc/power_analysis.Rmd")'
 	mv data/generated/power_runs.rds static/
 	mv data/generated/power_differential_effects.rds static/
 	mv doc/power_analysis.html output
 
 $(POWER_SIM): doc/power_analysis.Rmd code/R/linear_hypothesis_testing_fixest.R \
-  $(STATIC_POWER_SIM_DATA)
-  cp -f static/power_runs.rds data/generated
-  cp -f static/power_differential_effects.rds data/generated
-  $(RSCRIPT) -e 'library(rmarkdown); render("doc/power_analysis.Rmd")'
+	$(STATIC_POWER_SIM_DATA)
+	cp -f static/power_runs.rds data/generated
+	cp -f static/power_differential_effects.rds data/generated
+	$(RSCRIPT) -e 'library(rmarkdown); render("doc/power_analysis.Rmd")'
 	mv doc/power_analysis.html output
 
 $(EXP_SAMPLES): code/R/prepare_exp_samples.R $(EXP_DATA)
@@ -133,10 +133,10 @@ $(STATIC_RDF_OUTCOMES): code/r/rdf_exhaust_design.R \
 	code/R/rdf_design.R code/R/exp_utils.R $(EXP_DATA)
 	$(RSCRIPT) code/r/rdf_exhaust_design.R
 	
-$(RDF_OUTCOMES): $(STATIC_RDF_OUTCOMES) 
+$(RDF_OUTCOMES): $(STATIC_RDF_OUTCOMES)
 	cp -f static/rdf_code_doc.pdf output/
 	cp -f static/rdf_flowchart.pdf output/
-  cp -f static/rdf_outcomes.rds data/experiment/
+	cp -f static/rdf_outcomes.rds data/generated/
 	
 $(RDF_SPEC_CURVES):	code/r/rdf_create_spec_curves.R $(RDF_OUTCOMES)
 	$(RSCRIPT) code/r/rdf_create_spec_curves.R
