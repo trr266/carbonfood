@@ -17,7 +17,7 @@ This repository contains the following components:
 - All relevant data collected during the experiment and by the post-experimental survey (`data/experiment`).
 - Code to generate our experimental samples (`code/R/prepare_exp_samples.R`)
 - Code to produce all tables and figures included in the [debriefing material](https://www.accounting-for-transparency.de/can-carbon-footprint-information-influence-consumer-choice/), the paper, and in the online appendix (`exp_debriefing_figures.R`, `exp_preregistered_analysis.R`,  and `exp_additional_analyses.R` in `code/R/`).
-- Code to generate our [online dashboard](https://trr266.wiwi.hu-berlin.de/shiny/carbonfood/) that allows interested readers to assess the robustness of our findings by exploring various design choices. After running `make rdf` (see below), you should be able to start the dashboard locally by executing `code/R/rdf_display.R`.
+- Code to generate our [online dashboard](https://trr266.de/carbonfood/) that allows interested readers to assess the robustness of our findings by exploring various design choices. After running `make rdf` (see below), you should be able to start the dashboard locally by executing `code/R/rdf_display.R`.
 
 Feel free to reach out to the authors for questions and/or feedback.
 
