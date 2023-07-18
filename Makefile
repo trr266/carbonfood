@@ -127,16 +127,16 @@ $(EXP_PREREG_OUTPUT) $(EXP_PREREG_RESULTS): \
 	
 $(EXP_ADD_OUTPUT) $(EXP_ADD_RESULTS): \
 	code/R/exp_additional_analyses.R code/R/exp_utils.R $(EXP_SAMPLES)
-	$(RSCRIPT) code/r/exp_additional_analyses.R
+	$(RSCRIPT) code/R/exp_additional_analyses.R
 
-$(STATIC_RDF_OUTCOMES): code/r/rdf_exhaust_design.R \
+$(STATIC_RDF_OUTCOMES): code/R/rdf_exhaust_design.R \
 	code/R/rdf_design.R code/R/exp_utils.R $(EXP_DATA)
-	$(RSCRIPT) code/r/rdf_exhaust_design.R
+	$(RSCRIPT) code/R/rdf_exhaust_design.R
 	
 $(RDF_OUTCOMES): $(STATIC_RDF_OUTCOMES)
 	cp -f static/rdf_code_doc.pdf output/
 	cp -f static/rdf_flowchart.pdf output/
 	cp -f static/rdf_outcomes.rds data/generated/
 	
-$(RDF_SPEC_CURVES):	code/r/rdf_create_spec_curves.R $(RDF_OUTCOMES)
-	$(RSCRIPT) code/r/rdf_create_spec_curves.R
+$(RDF_SPEC_CURVES):	code/R/rdf_create_spec_curves.R $(RDF_OUTCOMES)
+	$(RSCRIPT) code/R/rdf_create_spec_curves.R
