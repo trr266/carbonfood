@@ -19,7 +19,7 @@ DISH_CHOICES := data/experiment/dish_choices.rds
 POWER_SIM_DATA := data/generated/power_runs.rds \
 	data/generated/power_differential_effects.rds
 
-POWER_SIM_RESULTS := output/power_sim_output.zip
+POWER_SIM_OUTPUT := output/power_sim_output.zip
 
 POWER_SIM := output/power_analysis.html
 
