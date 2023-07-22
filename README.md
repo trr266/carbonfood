@@ -63,7 +63,7 @@ install_package_if_missing("car")
 install_package_if_missing("marginaleffects")
 install_package_if_missing("devtools")
 install_package_if_missing("rsvg")
-install_package_if_missing("Rpostgres")
+install_package_if_missing("RPostgres")
 
 devtools::install_github("rich-iannone/DiagrammeRsvg")
 devtools::install_github("joachim-gassen/rdfanalysis")

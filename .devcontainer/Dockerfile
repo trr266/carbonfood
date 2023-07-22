@@ -28,7 +28,7 @@ RUN install2.r --error --skipinstalled car
 RUN install2.r --error --skipinstalled marginaleffects
 RUN install2.r --error --skipinstalled devtools
 RUN install2.r --error --skipinstalled rsvg
-RUN install2.r --error --skipinstalled Rpostgres
+RUN install2.r --error --skipinstalled RPostgres
 RUN rm -rf /tmp/downloaded_packages
 
 RUN R -e "devtools::install_github('joachim-gassen/rdfanalysis', ref = '23294355')"
