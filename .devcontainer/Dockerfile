@@ -4,11 +4,13 @@ RUN apt clean && apt update
 RUN apt-get -y install cmake git pandoc libxml2-dev libcurl4-openssl-dev && apt-get clean
 RUN apt-get -y install libssl-dev libgit2-dev wget libfontconfig1-dev && apt-get clean
 RUN apt-get -y install libharfbuzz-dev libfribidi-dev librsvg2-dev && apt-get clean
-RUN apt-get -y install libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev && apt-get clean
+RUN apt-get -y install libfreetype6-dev libpng-dev libtiff5-dev 
+RUN apt-get -y install libpq-dev libjpeg-dev && apt-get clean
 RUN apt-get -y install texlive && apt-get clean
 RUN apt-get -y install texlive-latex-extra && apt-get clean
 RUN apt-get -y install texlive-xetex && apt-get clean
 RUN apt-get -y install texlive-science && apt-get clean
+RUN apt-get -y install texlive-fonts-extra && apt-get clean
 
 RUN install2.r --error --skipinstalled tidyverse 
 RUN install2.r --error --skipinstalled lubridate 
@@ -33,7 +35,6 @@ RUN rm -rf /tmp/downloaded_packages
 
 RUN R -e "devtools::install_github('joachim-gassen/rdfanalysis', ref = '23294355')"
 RUN R -e "devtools::install_github('rich-iannone/DiagrammeRsvg', ref = '5057edac')"
-RUN apt-get -y install texlive-fonts-extra && apt-get clean
 
 CMD /bin/sh
 
