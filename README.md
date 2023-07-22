@@ -24,7 +24,9 @@ Feel free to reach out to the authors for questions and/or feedback.
 
 ### How do I reproduce the analysis?
 
-If you have RStudio and make/Rtools installed, the process should be relatively straightforward.
+You have two options: If you have [docker](https://www.docker.com) and [visual studio code](https://code.visualstudio.com) installed on your system or if you are using [GitHUb codespaces](https://github.com/features/codespaces), you should be able to reproduce our analysis by spinning up the development container included in the repository and running `make all` in the terminal (see below).
+
+Alternatively, if you have RStudio and make/Rtools installed, the following process should enable you to reproduce our putput locally.
 
 1. Download, clone or fork this repository to your local computing environment.
 2. Before building everything you most likely need to install additional packages. See the code below for installing the packages.
@@ -44,7 +46,7 @@ If you do not see a 'Build' tab this is most likely because you do not have 'mak
 install_package_if_missing <- function(pkg) {
   if (! pkg %in% installed.packages()[, "Package"]) install.packages(pkg)
 }
-install_package_if_missing("tidyverse")
+iinstall_package_if_missing("tidyverse")
 install_package_if_missing("lubridate")
 install_package_if_missing("fixest")
 install_package_if_missing("mlogit")
@@ -59,6 +61,11 @@ install_package_if_missing("ggforce")
 install_package_if_missing("emojifont")
 install_package_if_missing("car")
 install_package_if_missing("marginaleffects")
+install_package_if_missing("devtools")
+install_package_if_missing("rsvg")
+install_package_if_missing("Rpostgres")
+
+devtools::install_github("rich-iannone/DiagrammeRsvg")
 devtools::install_github("joachim-gassen/rdfanalysis")
 
 # In addition, if you have no working LaTeX environment, consider

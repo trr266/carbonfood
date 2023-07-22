@@ -4,8 +4,6 @@ author: "The authors of Beyer et al. (TBD)"
 date: '2021-12-20, v 0.6'
 output:
   html_document: default
-  word_document: default
-  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}

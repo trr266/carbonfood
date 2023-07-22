@@ -47,7 +47,7 @@ labels_dc <- rev(c(
   "Determine treatment times separately by counter",
   "Common treatment times for both counters",
   "Limit treatment times to stable food choices",
-  "Full treatment windows with vayring food choices",
+  "Full treatment windows with varying food choices",
   "Treatment change determined by point of sale",
   "Treatment change determined by info change",
   "Treatment change by median of pos and info",

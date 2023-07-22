@@ -140,3 +140,4 @@ $(RDF_OUTCOMES): $(STATIC_RDF_OUTCOMES)
 	
 $(RDF_SPEC_CURVES):	code/R/rdf_create_spec_curves.R $(RDF_OUTCOMES)
 	$(RSCRIPT) code/R/rdf_create_spec_curves.R
+	rm -f Rplots.pdf
