@@ -132,6 +132,8 @@ $(EXP_ADD_OUTPUT) $(EXP_ADD_RESULTS): \
 $(STATIC_RDF_OUTCOMES): code/R/rdf_exhaust_design.R \
 	code/R/rdf_design.R code/R/exp_utils.R $(EXP_DATA)
 	$(RSCRIPT) code/R/rdf_exhaust_design.R
+	cp data/generated/rdf_outcomes.rds static/
+	cp -f ouptut/rdf_* static/
 	
 $(RDF_OUTCOMES): $(STATIC_RDF_OUTCOMES)
 	cp -f static/rdf_code_doc.pdf output/
