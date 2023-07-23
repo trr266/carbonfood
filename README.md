@@ -14,9 +14,9 @@ This repository contains the following components:
 
 - Code for the fully parameterized simulation-based power analysis that we used in our preregistration report (`doc/power_analysis.Rmd`, the original power simulation can be assessed  [here](https://trr266.de/carbonfood/power_analysis.html)). 
 - Code for comparing the fixed effect models used in the analysis to various discrete choice models (`code/R/disc_choice_sim.R`, used during the review process)
-- All relevant data collected during the experiment and by the post-experimental survey (`data/experiment`).
+- All relevant data collected during the experiment (`data/experiment`) and by the post-experimental survey (`data/survey`).
 - Code to generate our experimental samples (`code/R/prepare_exp_samples.R`)
-- Code to produce all tables and figures included in the [debriefing material](https://www.accounting-for-transparency.de/can-carbon-footprint-information-influence-consumer-choice/), the paper, and in the online appendix (`exp_debriefing_figures.R`, `exp_preregistered_analysis.R`,  and `exp_additional_analyses.R` in `code/R/`).
+- Code to produce all tables and figures included in the [debriefing material](https://www.accounting-for-transparency.de/can-carbon-footprint-information-influence-consumer-choice/), the paper, and in the online appendix (`exp_debriefing_figures.R`, `exp_preregistered_analysis.R`,  `exp_additional_analyses.R`, and `survey_results.R` in `code/R/`).
 - Code to generate our [online dashboard](https://trr266.de/carbonfood/) that allows interested readers to assess the robustness of our findings by exploring various design choices. After running `make rdf` (see below), you should be able to start the dashboard locally by executing `code/R/rdf_display.R`.
 
 Feel free to reach out to the authors for questions and/or feedback.
