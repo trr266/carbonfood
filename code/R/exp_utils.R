@@ -65,13 +65,13 @@ construct_lin_hypotheses <- function(df) {
   ))
 } 
 
-create_hypotheses_table <- function(df, mw, mm, mc) {
+create_hypotheses_table <- function(df, mm, mw, mc) {
   lh <- construct_lin_hypotheses(df)
   
   hresults <- matrix(NA_character_, 4, 3)
   
   col <- 0
-  for (mod in list(mw, mm, mc)) {
+  for (mod in list(mm, mw, mc)) {
     col <- col + 1
     hresults[1, col] <- test_hypothesis(mod, lh["h1"])$starred
     hresults[2, col] <- test_hypothesis(mod, lh["h2"])$starred
@@ -79,7 +79,7 @@ create_hypotheses_table <- function(df, mw, mm, mc) {
     hresults[4, col] <- test_hypothesis(mod, lh["h4"])$starred
   }
   rownames(hresults) <- c("H1", "H2", "H3", "H4")
-  colnames(hresults) <- c("weight_mod", "mtfsh_mod", "co2e_mod")
+  colnames(hresults) <- c("mtfsh_mod", "weight_mod", "co2e_mod")
   
   return(list(
     df = hresults,

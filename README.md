@@ -64,6 +64,7 @@ install_package_if_missing("marginaleffects")
 install_package_if_missing("devtools")
 install_package_if_missing("rsvg")
 install_package_if_missing("RPostgres")
+install_package_if_missing("binom")
 
 devtools::install_github("rich-iannone/DiagrammeRsvg")
 devtools::install_github("joachim-gassen/rdfanalysis")

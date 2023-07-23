@@ -13,6 +13,8 @@ TMENT_DATA := data/experiment/tment_data.rds
 
 DISH_CHOICES := data/experiment/dish_choices.rds
 
+SURVEY_DATA := data/survey/survey_data.RData
+
 
 # Targets for pre-registered simulated power analysis
 
@@ -44,6 +46,11 @@ EXP_ADD_OUTPUT := output/exp_additional_output_dish.zip \
 EXP_RESULTS := $(EXP_DEBRIEFING_FIGURES) $(EXP_PREREG_OUTPUT) $(EXP_ADD_OUTPUT)
 
 
+# Targets for survey analysis
+
+SURVEY_OUTPUT := output/survey_output.zip
+
+
 # Targets for RDF analysis
 
 RDF_OUTCOMES := output/rdf_code_doc.pdf output/rdf_flowchart.pdf \
@@ -70,7 +77,8 @@ STATIC_TARGETS :=  $(STATIC_POWER_SIM_DATA) $(STATIC_DEBRIEFING_FIGURE) \
   
 # All targets combined
 
-TARGETS :=  $(STATIC_TARGETS) $(POWER_SIM) $(EXP_RESULTS) $(RDF_RESULTS)
+TARGETS :=  $(STATIC_TARGETS) $(POWER_SIM) $(EXP_RESULTS) $(SURVEY_OUTPUT) \
+  $(RDF_RESULTS)
 
 
 # Phony targets
@@ -83,13 +91,13 @@ static: $(STATIC_TARGETS)
 
 power: $(POWER_SIM)
 
-findings: $(EXP_RESULTS)
+findings: $(EXP_RESULTS) $(SURVEY_OUTPUT)
 
 rdf: $(RDF_RESULTS)
 
 clean:
 	rm -f $(POWER_SIM) $(POWER_SIM_OUTPUT) $(EXP_SAMPLES) $(EXP_RESULTS) \
-		$(RDF_SPEC_CURVES) $(POWER_SIM_DATA) $(RDF_OUTCOMES)
+		$(SURVEY_OUTPUT) $(RDF_SPEC_CURVES) $(POWER_SIM_DATA) $(RDF_OUTCOMES)
 
 dist-clean: clean
 	rm -f $(STATIC_TARGETS)
@@ -129,6 +137,9 @@ $(EXP_ADD_OUTPUT) $(EXP_ADD_RESULTS): \
 	code/R/exp_additional_analyses.R code/R/exp_utils.R $(EXP_SAMPLES)
 	$(RSCRIPT) code/R/exp_additional_analyses.R
 
+$(SURVEY_OUTPUT): code/R/survey_results.R $(SURVEY_DATA)
+	$(RSCRIPT) code/R/survey_results.R
+	
 $(STATIC_RDF_OUTCOMES): code/R/rdf_exhaust_design.R \
 	code/R/rdf_design.R code/R/exp_utils.R $(EXP_DATA)
 	$(RSCRIPT) code/R/rdf_exhaust_design.R
