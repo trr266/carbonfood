@@ -18,7 +18,7 @@ This directory contains the data collected by our post-experimental questionnair
 - `mtfsh`: Binary variable equal to 1 if the chosen dish by the diner contained meat or fish, 0 otherwise.
 - `weight`: The amount of food contained in the main dish container measured in grams.
 - `co2eg`: The carbon footprint information for the respective main dish. The calculation of this measure is detailed in the paper.
-- `first_time`: Whether the observation stems from the first experimental day a the respective paying card was used to purchase a meal.
+- `first_time`: Whether the observation stems from the first experimental day the respective paying card was used to purchase a meal.
 - `visits`: Number of distinct experimental days a paying card has been used.
 - `took_survey`: Binary variable equal to true if a diner took the survey, false otherwise.
 - `dining_data_match`: Binary variable equal to 1 if survey response could be matched to checkout data.
@@ -48,7 +48,7 @@ This directory contains the data collected by our post-experimental questionnair
 - `mtfsh`: Binary variable equal to 1 if the chosen dish by the diner contained meat or fish, 0 otherwise.
 - `weight`: The amount of food contained in the main dish container measured in grams.
 - `co2eg`: The carbon footprint information for the respective main dish. The calculation of this measure is detailed in the paper.
-- `first_time`: Whether the observation stems from the first experimental day a the respective paying card was used to purchase a meal.
+- `first_time`: Whether the observation stems from the first experimental day the respective paying card was used to purchase a meal.
 - `visits`: Number of distinct experimental days a paying card has been used.
 - `dining_data_match`: Binary variable equal to 1 if survey response could be matched to checkout data.
 - `took_survey`: Binary variable equal to true if a diner took the survey, false otherwise.
