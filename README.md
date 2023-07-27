@@ -1,5 +1,7 @@
 ## Carbon Footprint Information and Consumer Choice
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8188497.svg)](https://doi.org/10.5281/zenodo.8188497)
+
 This is the repository for the study:
 
 > "How Does Carbon Footprint Information Affect Consumer Choice? A Field Experiment", co-authored by Bianca Beyer (Aalto University), Rico Chaskel, Simone Euler, Joachim  Gassen (all Humboldt University Berlin), Ann-Kristin Großkopf, and Thorsten Sellhorn  (both LMU Munich).
