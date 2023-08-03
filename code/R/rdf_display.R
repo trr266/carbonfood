@@ -45,7 +45,6 @@ create_scp_list <- function(sc) {
   rv$label <- rv$title
   rv$addon_sc = scale_y_continuous(label = scales::label_percent())
   rv$highlight = data.frame(PREREG_CHOICES) 
-  rv$pt_size_highlight = 2
   rv
 }
 

@@ -34,7 +34,7 @@ RUN install2.r --error --skipinstalled RPostgres
 RUN install2.r --error --skipinstalled binom
 RUN rm -rf /tmp/downloaded_packages
 
-RUN R -e "devtools::install_github('joachim-gassen/rdfanalysis', ref = '23294355')"
+RUN R -e "devtools::install_github('joachim-gassen/rdfanalysis', ref = '92015b5')"
 RUN R -e "devtools::install_github('rich-iannone/DiagrammeRsvg', ref = '5057edac')"
 
 CMD /bin/sh
