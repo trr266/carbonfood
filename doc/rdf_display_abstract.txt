@@ -1,6 +1,7 @@
-This display presents the robustness of the key findings of <a href=https://www.accounting-for-transparency.de/can-carbon-footprint-information-influence-consumer-choice/>Beyer et al. (TBD)</a>.
+This display presents the robustness of the key findings of <a href=https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4523982>Beyer et al. (TBD)</a>.
 The study assesses the effects of various CO₂ labels on consumer choices by conducting a large field experiment in a student canteen setting.
-Starting from the pre-registered regression design, the below allows you to change design parameters for assessing the robustness of the study's key findings.
-As you add alternative designs, the display switches from reporting regression results in table form to displaying the researchers' degrees of freedom as a <a href=https://www.nature.com/articles/s41562-020-0912-z>specification curve</a>.
+Below, you can explore the robustness of the study's key findings.
+Starting with displaying the researchers' degrees of freedom as a <a href=https://www.nature.com/articles/s41562-020-0912-z>specification curve</a>, where the dot indicates our pre-registered design, you can add or remove choices to modify the display.
+As you zoom in on a small number of choices, the curves will be replaced by regression tables for your choosen designs (please be patient as the tables are rendered on the fly).
 You can explore 24 different specification curves for four distinct treatments and four pre-registered hypotheses across three different outcome variables.
 The code for this display as well as the data and code to reproduce our results presented in the paper are available in our <a href=https://github.com/trr266/carbonfood>GitHub repository</a>.

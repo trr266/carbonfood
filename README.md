@@ -24,7 +24,7 @@ Feel free to reach out to the authors for questions and/or feedback.
 
 ### How do I reproduce the analysis?
 
-You have two options: If you have [docker](https://www.docker.com) and [visual studio code](https://code.visualstudio.com) installed on your system or if you are using [GitHUb codespaces](https://github.com/features/codespaces), you should be able to reproduce our analysis by spinning up the development container included in the repository and running `make all` in the terminal (see below).
+You have two options: If you have [docker](https://www.docker.com) and [visual studio code](https://code.visualstudio.com) installed on your system or if you are using [GitHub codespaces](https://github.com/features/codespaces), you should be able to reproduce our analysis by spinning up the development container included in the repository and running `make all` in the terminal (see below).
 
 Alternatively, if you have RStudio and make/Rtools installed, the following process should enable you to reproduce our putput locally.
 
@@ -46,7 +46,7 @@ If you do not see a 'Build' tab this is most likely because you do not have 'mak
 install_package_if_missing <- function(pkg) {
   if (! pkg %in% installed.packages()[, "Package"]) install.packages(pkg)
 }
-iinstall_package_if_missing("tidyverse")
+install_package_if_missing("tidyverse")
 install_package_if_missing("lubridate")
 install_package_if_missing("fixest")
 install_package_if_missing("mlogit")

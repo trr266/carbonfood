@@ -19,6 +19,21 @@ PREREG_CHOICES <- list(
   controls = "none"
 )
 
+RDF_CHOICES <- list(
+  unit_of_observation = c("dish", "transaction"),
+  edays_include = c("no_eday9", "no_eday11", "all"),
+  only_first_timers = c("no", "yes"),
+  use_counter_info = c("no", "yes"),
+  limit_twindows_to_stable_choice_sets = c("yes", "no"),
+  identify_tment_change = c("on_counter", "on_info", "median", "exclude"),
+  mtfsh_model = "logit",
+  dep_vars = c("log", "level"),
+  fixed_effects_choice_set = "edaycounter",
+  fixed_effects_time_of_day = "tslot",
+  standard_errors = "cluster edaycounter_tslot",
+  controls = c("none", "all")
+)
+
 rdf_outcomes <- readRDS("data/generated/rdf_outcomes.rds")
 
 create_scp_list <- function(sc) {
@@ -29,6 +44,8 @@ create_scp_list <- function(sc) {
   rv$est_label <- ""
   rv$label <- rv$title
   rv$addon_sc = scale_y_continuous(label = scales::label_percent())
+  rv$highlight = data.frame(PREREG_CHOICES) 
+  rv$pt_size_highlight = 2
   rv
 }
 
@@ -150,30 +167,16 @@ choice_labels <- c(
 
 abstract <- read_file("doc/rdf_display_abstract.txt")
 
-df <- rdf_outcomes %>% filter(
-  standard_errors == "cluster edaycounter_tslot",
-  fixed_effects_choice_set == "edaycounter",
-  fixed_effects_time_of_day == "tslot",
-  mtfsh_model == "logit"
-) %>%
-  select(
-    -standard_errors, -fixed_effects_choice_set, -fixed_effects_time_of_day,
-    -mtfsh_model
-  )
-attr(df, "choices") <- 1:8
-
-PRE_REG_DC = PREREG_CHOICES[c(1:6, 8, 12)]
-
 shiny_rdf_spec_curve(
   title = "Do CO\u2082 labels affect consumer choice?", 
   abstract = abstract,
   libs = c("tidyverse", "lubridate", "fixest", "marginaleffects"),
   choice_labels = choice_labels,
-  rdf_outcomes, default_choices = PREREG_CHOICES,
+  rdf_outcomes, default_choices = RDF_CHOICES,
   design = design, start_input = list(base_smp_dish, base_smp_taction),  
   model_render_func = my_model_render_func,
   restore_button = TRUE, with_spinner = TRUE,
-  spec_curve_parms = scparms, spec_curve_selected = "co2eg_moneycolorcoded"
+  spec_curve_parms = scparms, spec_curve_selected = "co2eg_h1"
 )
 
 
