@@ -19,7 +19,8 @@ This repository contains the following components:
 - All relevant data collected during the experiment (`data/experiment`) and by the post-experimental survey (`data/survey`).
 - Code to generate our experimental samples (`code/R/prepare_exp_samples.R`)
 - Code to produce all tables and figures included in the [debriefing material](https://www.accounting-for-transparency.de/can-carbon-footprint-information-influence-consumer-choice/), the paper, and in the online appendix (`exp_debriefing_figures.R`, `exp_preregistered_analysis.R`,  `exp_additional_analyses.R`, and `survey_results.R` in `code/R/`).
-- Code to generate our [online dashboard](https://trr266.de/carbonfood/) that allows interested readers to assess the robustness of our findings by exploring various design choices. After running `make rdf` (see below), you should be able to start the dashboard locally by executing `code/R/rdf_display.R`.
+- Code to generate our researcher degree of freedom analysis (`rdf_design.R`, `rdf_exhaust_design.R`, and `ref_create_spec_curves.R` in `code/R/`)
+- Code to generate our [online dashboard](https://trr266.de/carbonfood/) that allows interested readers to assess the robustness of our findings by exploring various design choices via the above mentioned researcher degree of freedom analysis (`code/R/rdf_display.R`).
 
 Feel free to reach out to the authors for questions and/or feedback.
 
@@ -28,12 +29,13 @@ Feel free to reach out to the authors for questions and/or feedback.
 
 You have two options: If you have [docker](https://www.docker.com) and [visual studio code](https://code.visualstudio.com) installed on your system or if you are using [GitHub codespaces](https://github.com/features/codespaces), you should be able to reproduce our analysis by spinning up the development container included in the repository and running `make all` in the terminal (see below).
 
-Alternatively, if you have RStudio and make/Rtools installed, the following process should enable you to reproduce our putput locally.
+Alternatively, if you have RStudio and make/Rtools installed, the following process should enable you to reproduce our output locally.
 
 1. Download, clone or fork this repository to your local computing environment.
 2. Before building everything you most likely need to install additional packages. See the code below for installing the packages.
 3. Run 'make all' either via the terminal or by identifying the 'Build All' button in the 'Build' tab (normally in the upper right quadrant of the RStudio screen). 
-4. Eventually, you will be greeted with several files in the `data/generated` and `output` directories containing our generated data and analysis. Congratulations! 
+4. Eventually, you will be greeted with several files in the `data/generated` and `output` directories containing our generated data and analysis.
+5. If you want to start our researchers degree of freedom dashboard locally, execute `Rscript code/R/rdf_display.R` from your local terminal.
 
 If you do not see a 'Build' tab this is most likely because you do not have 'make' installed on your system. 
 
