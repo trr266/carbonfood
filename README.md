@@ -8,7 +8,7 @@ This is the repository for the study:
 
 This project has been developed within project ["Real Effects of Transparency" (B04)](https://www.accounting-for-transparency.de/projects/real-effects-of-transparency) of the [TRR 266 "Accounting for Transparency"](https://www.accounting-for-transparency.de). 
 
-![Carbon footprint effects of Beyer et al. (forthcoming)](https://github.com/trr266/carbonfood/blob/main/static/debriefing_res_exp.svg)
+![Carbon footprint effects of Beyer et al. (forthcoming)](https://raw.githubusercontent.com/trr266/carbonfood/main/static/debriefing_res_exp.svg)
 
 We have presented our experimental design at the 2021 Registered Report Conference of the Journal of Accounting Research, and then, after incorporating the feedback from the conference and the review process, run a large-scale field experiment to assess how attributes of carbon footprint information affect consumer choice. Partnering with the [Studierendenenwerk München Oberbayern](https://www.studierendenwerk-muenchen-oberbayern.de/en/), we manipulated the understandability, mental accounting framing, and color-coding of carbon footprint information on food labels and measured differences in consumers’ food choices. As displayed in the figure above, treated consumers chose meat dishes significantly less often and reduced their food related carbon footprint by up to 9.2%, depending on the treatment. The effects were strongest for carbon footprint information expressed in monetary units (‘environmental costs’) and color-coded in the familiar traffic-light scheme. A post-experimental survey has shown that these effects were found although respondents, on average, self-reported low concern for the environmental footprint of their meal choices.
 

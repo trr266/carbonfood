@@ -1,4 +1,4 @@
-This display presents the robustness of the key findings of <a href=https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4523982>Beyer et al. (TBD)</a>.
+This display presents the robustness of the key findings of <a href=https://doi.org/10.1111/1475-679X.12505>Beyer et al. (JAR, 2023)</a>.
 The study assesses the effects of various CO₂ labels on consumer choices by conducting a large field experiment in a student canteen setting.
 Below, you can explore the robustness of the study's key findings.
 Starting with displaying the researchers' degrees of freedom as a <a href=https://www.nature.com/articles/s41562-020-0912-z>specification curve</a>, where the large dot indicates our pre-registered design, you can add or remove choices to modify the display.
