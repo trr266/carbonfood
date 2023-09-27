@@ -15,6 +15,8 @@ RUN apt-get -y install texlive-fonts-extra && apt-get clean
 RUN install2.r --error --skipinstalled tidyverse 
 RUN install2.r --error --skipinstalled lubridate 
 RUN install2.r --error --skipinstalled DBI 
+RUN install2.r --error --skipinstalled writexl 
+RUN install2.r --error --skipinstalled readxl 
 RUN install2.r --error --skipinstalled fixest 
 RUN install2.r --error --skipinstalled mlogit  
 RUN install2.r --error --skipinstalled truncnorm 
@@ -29,6 +31,7 @@ RUN install2.r --error --skipinstalled emojifont
 RUN install2.r --error --skipinstalled car
 RUN install2.r --error --skipinstalled marginaleffects
 RUN install2.r --error --skipinstalled devtools
+RUN install2.r --error --skipinstalled pwr
 RUN install2.r --error --skipinstalled rsvg
 RUN install2.r --error --skipinstalled RPostgres
 RUN install2.r --error --skipinstalled binom

@@ -2,8 +2,8 @@
 // README at: https://github.com/rocker-org/devcontainer-templates/tree/main/src/r-ver
 {
 	"name": "carbonfood_rver_4.2",
+	"dockerFile": "Dockerfile",
 	"build": {  
-		"image": "ghcr.io/trr266/carbonfood:latest",
 		"cacheFrom": "ghcr.io/trr266/carbonfood:latest"
 	}
 }
