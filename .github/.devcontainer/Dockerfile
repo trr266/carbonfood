@@ -32,6 +32,8 @@ RUN install2.r --error --skipinstalled devtools
 RUN install2.r --error --skipinstalled rsvg
 RUN install2.r --error --skipinstalled RPostgres
 RUN install2.r --error --skipinstalled binom
+RUN install2.r --error --skipinstalled languageserver
+
 RUN rm -rf /tmp/downloaded_packages
 
 RUN R -e "devtools::install_github('joachim-gassen/rdfanalysis', ref = '92015b5')"
