@@ -27,4 +27,4 @@ jobs:
         with:
           imageName: ghcr.io/trr266/carbonfood
           cacheFrom: ghcr.io/trr266/carbonfood
-          platform: linux/amd64,linux/arm64
+          platform: linux/amd64
