@@ -10,7 +10,7 @@ This project has been developed within project ["Real Effects of Transparency" (
 
 ![Carbon footprint effects of Beyer et al. (forthcoming)](https://raw.githubusercontent.com/trr266/carbonfood/main/static/debriefing_res_exp.svg)
 
-We have presented our experimental design at the 2021 Registered Report Conference of the Journal of Accounting Research, and then, after incorporating the feedback from the conference and the review process, run a large-scale field experiment to assess how attributes of carbon footprint information affect consumer choice. Partnering with the [Studierendenenwerk München Oberbayern](https://www.studierendenwerk-muenchen-oberbayern.de/en/), we manipulated the understandability, mental accounting framing, and color-coding of carbon footprint information on food labels and measured differences in consumers’ food choices. As displayed in the figure above, treated consumers chose meat dishes significantly less often and reduced their food related carbon footprint by up to 9.2%, depending on the treatment. The effects were strongest for carbon footprint information expressed in monetary units (‘environmental costs’) and color-coded in the familiar traffic-light scheme. A post-experimental survey has shown that these effects were found although respondents, on average, self-reported low concern for the environmental footprint of their meal choices.
+This study reports the results of a field experiment investigating how attributes of carbon footprint information affect consumer choice in a large dining facility. We have presented our experimental design at the 2021 Registered Report Conference of the Journal of Accounting Research, and then, after incorporating the feedback from the conference and the review process, run a large-scale field experiment to assess our pre-registered research questions. Partnering with the [Studierendenenwerk München Oberbayern](https://www.studierendenwerk-muenchen-oberbayern.de/en/), we manipulated the understandability, mental accounting framing, and color-coding of carbon footprint information on food labels and measured differences in consumers’ food choices. As displayed in the figure above, treated consumers chose meat dishes significantly less often and reduced their food related carbon footprint by up to 9.2%, depending on the treatment. The effects were strongest for carbon footprint information expressed in monetary units (‘environmental costs’) and color-coded in the familiar traffic-light scheme. A post-experimental survey has shown that these effects were found although respondents, on average, self-reported low concern for the environmental footprint of their meal choices.
 
 This repository contains the following components:
 
@@ -27,23 +27,19 @@ Feel free to reach out to the authors for questions and/or feedback.
 
 ### How do I reproduce the analysis?
 
-You have two options: If you have [docker](https://www.docker.com) and [visual studio code](https://code.visualstudio.com) installed on your system or if you are using [GitHub codespaces](https://github.com/features/codespaces), you should be able to reproduce our analysis by spinning up the development container included in the repository and running `make all` in the terminal (see below).
+**Setting up the code environment - Option 1: Use GitHub codespaces** 
 
-Alternatively, if you have RStudio and make/Rtools installed, the following process should enable you to reproduce our output locally.
+If you have a GitHub account, we suggest that you start with this option, which uses [GitHub codespaces](https://github.com/features/codespaces). To reproduce our analysis, simply go to the [repository page on GitHub](https://github.com/trr266/carbonfood) and click on the "Code" button in the upper right half of the screen. On the Codespaces tab, it will provide you with the option to create a codespace on the main branch of the repo. Do that, wait patiently for a few minutes while the container is built on the GitHub cloud and then you will be taken to a browser instance of Visual Studio Code that runs within that container. Continue with **Recreating the analysis** below. Please Note: While GitHub codespaces currently provides 60 hours of free monthly access to a two core cloud instance, exceeding this limit will trigger costs. So, if you are in for a deeper dive into our code, we suggest to pick one of the other options.
 
-1. Download, clone or fork this repository to your local computing environment.
-2. Before building everything you most likely need to install additional packages. See the code below for installing the packages.
-3. Run 'make all' either via the terminal or by identifying the 'Build All' button in the 'Build' tab (normally in the upper right quadrant of the RStudio screen). 
-4. Eventually, you will be greeted with several files in the `data/generated` and `output` directories containing our generated data and analysis.
-5. If you want to start our researchers degree of freedom dashboard locally, execute `Rscript code/R/rdf_display.R` from your local terminal.
 
-If you do not see a 'Build' tab this is most likely because you do not have 'make' installed on your system. 
+**Setting up the code environment - Option 2: Use Visual Studio Code and a Docker development container** 
 
-- For Windows: Install Rtools: https://cran.r-project.org/bin/windows/Rtools/.
-- For MacOS: You need to install the Mac OS developer tools. Open a terminal and run `xcode-select --install`. Follow the instructions.
-- On Linux: We have never seen a Unix environment without 'make'. 
+This requires you to have both [Docker](https://www.docker.com) and [Visual Studio Code](https://code.visualstudio.com) installed on your system and allows you to spin up our development container locally. To set up the code environment, start Visual Studio Code, enter the command palette (Ctrl+Shift+P) and run "Dev Containers: Clone Repository in Container Volume", providing the URL of this repository. It will take a while but you should eventually be placed in a local Docker container that contains the code environment and this repository. Continue with **Recreating the analysis** below.
 
-**Please note:** Because of the power simulation and the researcher degree of freedom analysis, reproducing all elements would take several hours. To cut down on this, `make all` uses static versions of these data files (stored in `static`). If you want to reproduce these files, you need to run `make dist-clean`, followed by `make all`. You can also just reproduce subsets of the analysis by running `make power`, `make findings`, or `make rdf`. 
+
+**Setting up the code environment - Option 3: Use your own local code environment** 
+
+This likely will involve some fiddling and requires you to have R, RStudio, and RTools installed (Mac Users: There is no RTools for Mac. Instead make sure that you have XCode installed. Open a terminal and run `xcode-select --install`. Follow the instructions. Linux users: You should be fine as our code only requires 'make' to be available). Download, clone or fork this repository to your local computing environment. Before building everything you most likely need to install additional packages. See the R code below for installing the packages. Please note that, by installing current package versions, you might run into compatibility issues. If you face these problems, you can either try to mimic our code environment (R version 4.2.3 and dependencies as of 2023-06-16) or use one of the two options above.
 
 ```
 # Code to install packages to your system
@@ -87,6 +83,15 @@ tinytex::install_tinytex()
 # RSTUDIO_PANDOC to whatever it points to from within RStudio (run
 # Sys.getenv("RSTUDIO_PANDOC")' from within the R console to find out)
 ```
+
+**Recreating the analysis**
+
+Run `make all` either via the terminal or, if you are using RStudio, by identifying the 'Build All' button in the 'Build' tab (normally in the upper right quadrant of the RStudio screen). It will start the build process and source several R code files, generating our samples in the `data/generated` folder and (partly zipped) analysis output in the `output` folder. Please note: Rerunning the power simulation and the researcher degree of freedom analysis would take several hours. To cut down on this, `make all` uses static versions of these data files (stored in `static`). If you want to reproduce these files, you need to run `make dist-clean`, followed by `make all`. You can also just reproduce subsets of the analysis by running `make power`, `make findings`, or `make rdf`.
+
+
+**Running the researcher degree of freedom dashboard locally**
+
+Eexecute `Rscript code/R/rdf_display.R` from your local terminal (not from the R console). If you are running this from within a container Visual Studio Code will ask you for permission to open a port and show the output in your browser. It is safe to say "yes".
 
 
 ### Disclaimer

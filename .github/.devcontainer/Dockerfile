@@ -38,6 +38,7 @@ RUN rm -rf /tmp/downloaded_packages
 
 RUN R -e "devtools::install_github('joachim-gassen/rdfanalysis', ref = '92015b5')"
 RUN R -e "devtools::install_github('rich-iannone/DiagrammeRsvg', ref = '5057edac')"
+RUN R -e "devtools::install_github('ManuelHentschel/vscDebugger', ref = '22397c3')"
 
 CMD /bin/sh
 
