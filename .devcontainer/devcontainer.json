@@ -7,7 +7,9 @@
 		"vscode": {
 			"extensions": [
 				"REditorSupport.r",
-				"RDebugger.r-debugger"
+				"RDebugger.r-debugger",
+				"slevesque.vscode-zipexplorer",
+				"searking.preview-vscode"
 			]
 		}
 	}
