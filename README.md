@@ -33,7 +33,9 @@ This video tutorial shows how to implement option 1 from below and reproduce our
 
 <p>&nbsp;</p>
 <p align="center">
-[![Replicate Beyer et al. (JAR, 2023) using GitHub Codepspaces](https://img.youtube.com/vi/PM7K1Z5P2XY/mqdefault.jpg)](https://www.youtube.com/watch?v=PM7K1Z5P2XY)
+<a href="https://www.youtube.com/watch?v=PM7K1Z5P2XY">
+<img src="https://img.youtube.com/vi/PM7K1Z5P2XY/mqdefault.jpg" alt="Replicate Beyer et al. (JAR, 2023) using GitHub Codepspaces">
+</a>
 </p>
 <p>&nbsp;</p>
 
