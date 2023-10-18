@@ -103,7 +103,7 @@ Run `make all` either via the terminal or, if you are using RStudio, by identify
 
 **Running the researcher degree of freedom dashboard locally**
 
-Eexecute `Rscript code/R/rdf_display.R` from your local terminal (not from the R console). If you are running this from within a container Visual Studio Code will ask you for permission to open a port and show the output in your browser. It is safe to say "yes".
+Execute `Rscript code/R/rdf_display.R` from your local terminal (not from the R console). If you are running this from within a container Visual Studio Code will ask you for permission to open a port and show the output in your browser. It is safe to say "yes".
 
 
 ### Disclaimer
