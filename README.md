@@ -4,7 +4,7 @@
 
 This is the repository for the study:
 
-> Bianca Beyer, Rico Chaskel, Simone Euler, Joachim Gassen, Ann-Kristin Großkopf, and Thorsten Sellhorn (2023): How Does Carbon Footprint Information Affect Consumer Choice? A Field Experiment, Journal of Accounting Research (forthcoming), https://doi.org/10.1111/1475-679X.12505.
+> Bianca Beyer, Rico Chaskel, Simone Euler, Joachim Gassen, Ann-Kristin Großkopf, and Thorsten Sellhorn (2024): How Does Carbon Footprint Information Affect Consumer Choice? A Field Experiment, Journal of Accounting Research 62(1): 101-136, https://doi.org/10.1111/1475-679X.12505.
 
 This project has been developed within project ["Real Effects of Transparency" (B04)](https://www.accounting-for-transparency.de/projects/real-effects-of-transparency) of the [TRR 266 "Accounting for Transparency"](https://www.accounting-for-transparency.de). 
 
